@@ -1,0 +1,40 @@
+.navigation {
+  height: var(--navigation-menu-height);
+  width: 100%;
+
+  position: sticky;
+  top: 0;
+
+  z-index: 100;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 8px;
+
+  background-color: black;
+  top: 0;
+
+  border-bottom: 1px solid #202020;
+
+  box-shadow: 1px 1px 16px 5px rgba(0, 0, 0, 0.31);
+  -webkit-box-shadow: 1px 1px 16px 5px rgba(0, 0, 0, 0.31);
+  -moz-box-shadow: 1px 1px 16px 5px rgba(0, 0, 0, 0.31);
+
+  .navigation-heading {
+    color: white;
+    margin: 0;
+
+    font-size: 30px;
+
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+  }
+
+  .home-button {
+    color: white;
+  }
+}
