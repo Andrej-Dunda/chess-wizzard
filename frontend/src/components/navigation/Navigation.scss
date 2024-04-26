@@ -14,17 +14,17 @@
 
   padding: 8px;
 
-  background-color: black;
+  background-color: var(--grayscale-900);
   top: 0;
 
-  border-bottom: 1px solid #202020;
+  border-bottom: 1px solid var(--grayscale-700);
 
   box-shadow: 1px 1px 16px 5px rgba(0, 0, 0, 0.31);
   -webkit-box-shadow: 1px 1px 16px 5px rgba(0, 0, 0, 0.31);
   -moz-box-shadow: 1px 1px 16px 5px rgba(0, 0, 0, 0.31);
 
   .navigation-heading {
-    color: white;
+    color: var(--grayscale-100);
     margin: 0;
 
     font-size: 30px;
@@ -35,6 +35,7 @@
   }
 
   .home-button {
-    color: white;
+    color: var(--grayscale-100);
+    background-color: var(--grayscale-900);
   }
 }
