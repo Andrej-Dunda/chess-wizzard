@@ -1,0 +1,49 @@
+.snackbar {
+  min-width: 100px;
+  width: fit-content;
+  background-color: var(--grayscale-900);
+
+  color: var(--grayscale-100);
+  text-align: center;
+  font-size: 17px;
+  font-weight: 500;
+
+  border: 1px solid var(--grayscale-100);
+  border-radius: 8px;
+
+  padding: 16px;
+  position: fixed;
+  z-index: 500;
+  top: 70px;
+  right: 20px;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      right: -50px;
+    }
+    to {
+      opacity: 1;
+      right: 20px;
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+      right: 20px;
+    }
+    to {
+      opacity: 0;
+      right: -50px;
+    }
+  }
+
+  &.fade-in {
+    animation: fadeIn 0.31s;
+  }
+
+  &.fade-out {
+    animation: fadeOut 0.31s;
+  }  
+}

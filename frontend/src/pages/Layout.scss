@@ -1,9 +1,9 @@
 .layout {
   width: 100vw;
-  min-height: 100vh;
+  height: 100vh;
 
   display: grid;
   grid-template-rows: var(--navigation-menu-height) 1fr;
 
-  overflow: hidden;
+  // overflow: hidden;
 }

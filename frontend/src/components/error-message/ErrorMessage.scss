@@ -1,0 +1,39 @@
+.error-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  color: var(--error-red);
+  font-weight: 500;
+  align-self: center;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.3s;
+  height: 24px;
+
+  @keyframes appear {
+    from {
+      height: 0;
+    }
+    to {
+      height: 24px;
+    }
+  }
+
+  @keyframes disappear {
+    from {
+      height: 24px;
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  &.active {
+    animation: appear 0.31s;
+  }
+
+  &.inactive {
+    animation: fadeOut 0.31s;
+  }  
+}

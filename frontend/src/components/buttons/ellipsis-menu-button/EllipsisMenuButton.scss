@@ -1,0 +1,59 @@
+.ellipsis-menu-button {
+  --primary-color: var(--grayscale-100);
+  --secondary-color: var(--grayscale-900);
+
+  .ellipsis-button {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+
+    color: var(--primary-color);
+    background-color: transparent;
+  }
+
+  .popup-menu {
+    position: absolute;
+
+    transform: translateX(calc(-50% + 16px));
+
+    min-width: 100px;
+
+    border-radius: 16px;
+    overflow: hidden;
+
+    z-index: 200;
+
+    background-color: var(--grayscale-100);
+
+    box-shadow: 1px 1px 8px 1px rgba(0, 0, 0, 0.31);
+    -webkit-box-shadow: 1px 1px 8px 1px rgba(0, 0, 0, 0.31);
+    -moz-box-shadow: 1px 1px 8px 1px rgba(0, 0, 0, 0.31);
+
+    .menu-item {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 8px;
+
+      padding: 16px;
+      color: var(--grayscale-900);
+      background-color: var(--grayscale-100);
+      text-align: center;
+
+      z-index: 200;
+
+      cursor: pointer;
+
+      &:hover {
+        background-color: var(--hover-white);
+      }
+    }
+  }
+}

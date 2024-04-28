@@ -1,0 +1,23 @@
+.edit-tournament-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .tournament-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  
+    padding: 16px 0;
+
+    .name-input-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      label {
+        font-weight: 500;
+      }
+    }
+  }
+}
