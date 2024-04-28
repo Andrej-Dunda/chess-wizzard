@@ -1,13 +1,13 @@
-import { useNavigate } from 'react-router-dom';
 import './Navigation.scss'
+import { useNav } from '../../contexts/NavigationProvider';
 
 const Navigation = () => {
-  const navigate = useNavigate();
+  const { toHome } = useNav();
 
   return (
     <div className="navigation">
-      <h1 className='navigation-heading'>Chess Wizzard</h1>
-      <button className="home-button" onClick={() => navigate('/')}>Domů</button>
+      <h2 className='navigation-heading' onClick={toHome}>Chess Wizzard</h2>
+      <button className="home-button" onClick={toHome}>Domů</button>
     </div>
   )
 }

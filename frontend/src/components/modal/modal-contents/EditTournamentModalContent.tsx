@@ -29,7 +29,7 @@ const EditTournamentModalContent = ({tournament}: EditTournamentModalContentProp
       return
     }
 
-    putTournament(tournament._id, newTournamentName)
+    putTournament(tournament._id, newTournamentName, tournament.participants)
     closeModal()
   }
 
