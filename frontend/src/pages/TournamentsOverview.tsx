@@ -28,7 +28,7 @@ const TournamentsOverview = () => {
   const openDeleteTournamentModal = (tournament: iTournament) => {
     showModal(
       <DeleteModalContent
-        onSubmit={() => deleteTournament(tournament._id)}
+        onSubmit={() => deleteTournament(tournament.id)}
         submitButtonLabel='Smazat'
         cancelButtonLabel='Zrušit'
         title={`Smazat turnaj "${tournament.name}"?`}

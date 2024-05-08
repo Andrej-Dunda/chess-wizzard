@@ -21,14 +21,14 @@ const TournamentWindow = () => {
         return
       }
 
-      selectedTournament && putTournament(selectedTournament._id, selectedTournament.name, [...selectedTournament.participants, {_id: generateRandomString(10), name: newParticipantName}])
+      selectedTournament && putTournament(selectedTournament.id, selectedTournament.name, [...selectedTournament.participants, {id: generateRandomString(10), name: newParticipantName}])
       setNewParticipantName('')
       newParticipantInputRef.current?.focus()
     }
   }
 
   const removeParticipant = (participantId: string) => {
-    selectedTournament && putTournament(selectedTournament._id, selectedTournament.name, selectedTournament.participants.filter(participant => participant._id !== participantId))
+    selectedTournament && putTournament(selectedTournament.id, selectedTournament.name, selectedTournament.participants.filter(participant => participant.id !== participantId))
   }
 
   return (
@@ -55,7 +55,7 @@ const TournamentWindow = () => {
               {selectedTournament?.participants.sort().map((participant: iParticipant, index) => (
                 <div key={index} className="participant">
                   <span className="participant-name">{participant.name}</span>
-                  <FontAwesomeIcon icon={faXmark} color={grayscale900} className='remove-icon' onClick={() => removeParticipant(participant._id)} />
+                  <FontAwesomeIcon icon={faXmark} color={grayscale900} className='remove-icon' onClick={() => removeParticipant(participant.id)} />
                 </div>
               ))}
             </div>

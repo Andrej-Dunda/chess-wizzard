@@ -1,8 +1,8 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import React from 'react';
 import { iParticipant, iTournament } from '../interfaces/tournaments-interface';
 import { useSnackbar } from './SnackbarProvider';
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 
 type TournamentsContextType = {
   tournaments: iTournament[];
@@ -25,143 +25,146 @@ type TournamentsProviderProps = {
 
 export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   const [tournaments, setTournaments] = useState<iTournament[]>([
-    {
-      _id: 'asdf1',
-      name: 'Turnaj 1',
-      date: '2024-1-10',
-      participants: [
-        {
-          _id: uuidv4(),
-          name: 'Andrej'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Jirka'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Honza'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Kuba'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Lukáš'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Martin'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Michal'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Petr'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Tomáš'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Vojta'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Zdeněk'
-        }
-      ]
-    },
-    {
-      _id: 'asdf2',
-      name: 'Turnaj 2',
-      date: '2024-2-10',
-      participants: []
-    },
-    {
-      _id: 'asdf3',
-      name: 'Turnaj 3',
-      date: '2024-3-10',
-      participants: [
-        {
-          _id: uuidv4(),
-          name: 'Branibor'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Borek'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Drahoslav'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Egon'
-        },
-        {
-          _id: uuidv4(),
-          name: 'František'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Gustav'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Hynek'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Ivan'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Jaroslav'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Kamil'
-        },
-        {
-          _id: uuidv4(),
-          name: 'Ladislav'
-        }
-      ]
-    }
+    // {
+    //   id: 'asdf1',
+    //   name: 'Turnaj 1',
+    //   date: '2024-1-10',
+    //   participants: [
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Andrej'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Jirka'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Honza'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Kuba'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Lukáš'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Martin'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Michal'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Petr'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Tomáš'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Vojta'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Zdeněk'
+    //     }
+    //   ]
+    // },
+    // {
+    //   id: 'asdf2',
+    //   name: 'Turnaj 2',
+    //   date: '2024-2-10',
+    //   participants: []
+    // },
+    // {
+    //   id: 'asdf3',
+    //   name: 'Turnaj 3',
+    //   date: '2024-3-10',
+    //   participants: [
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Branibor'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Borek'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Drahoslav'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Egon'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'František'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Gustav'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Hynek'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Ivan'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Jaroslav'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Kamil'
+    //     },
+    //     {
+    //       id: uuidv4(),
+    //       name: 'Ladislav'
+    //     }
+    //   ]
+    // }
   ])
   const [selectedTournament, setSelectedTournament] = useState<iTournament>()
-
   const { openSnackbar } = useSnackbar();
 
-  const getTournaments = async (select?: string) => {
-    console.log('getTournaments')
+  useEffect(() => {
+    getTournaments()
+  }, []);
+
+  const getTournaments = async () => {
+    const tournamentsData = await window.api.getTournaments();
+    tournamentsData && setTournaments(tournamentsData)
+    console.log(tournamentsData)
   }
 
   const postTournament = async (newTournamentName: string) => {
+    const date = new Date();
+    const formattedDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    
     if (newTournamentName) {
-      setTournaments([...tournaments, {
-        _id: uuidv4(),
-        name: newTournamentName,
-        date: '2024-1-10',
-        participants: []
-      }
-      ])
+      await window.api.createTournament({ name: newTournamentName, date: formattedDate })
+      getTournaments()
       openSnackbar('Turnaj vytvořen!')
     }
   }
 
   const getTournament = (tournamentId: string) => {
-    setSelectedTournament(tournaments.find(tournament => tournament._id === tournamentId))
+    setSelectedTournament(tournaments.find(tournament => tournament.id === tournamentId))
   }
 
   const putTournament = (tournamentId: string, tournamentName: string, tournamentParticipants: iParticipant[]) => {
     const updatedTournaments = tournaments.map(tournament => {
-      if (tournament._id === tournamentId) {
+      if (tournament.id === tournamentId) {
         return {
           ...tournament,
           name: tournamentName,
@@ -172,11 +175,11 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     })
     console.log(updatedTournaments)
     setTournaments(updatedTournaments)
-    setSelectedTournament(updatedTournaments.find(tournament => tournament._id === tournamentId))
+    setSelectedTournament(updatedTournaments.find(tournament => tournament.id === tournamentId))
   }
 
   const deleteTournament = (tournamentId: string) => {
-    const updatedTournaments = tournaments.filter(tournament => tournament._id !== tournamentId)
+    const updatedTournaments = tournaments.filter(tournament => tournament.id !== tournamentId)
     setTournaments(updatedTournaments)
     openSnackbar('Turnaj smazán!')
   }

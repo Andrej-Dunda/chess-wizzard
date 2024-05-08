@@ -1,5 +1,6 @@
+const db = require('./database'); // Importing the database from the database file
 let isDev;
-const { app, BrowserWindow, session } = require('electron'); // electron
+const { app, BrowserWindow, session, ipcMain } = require('electron'); // electron
 const path = require('path');
 
 let mainWindow;
@@ -71,4 +72,30 @@ process.on('uncaughtException', (error) => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+// IPC communication
+
+// Create tournament
+ipcMain.on('create-tournament', (event, args) => {
+  db.run('INSERT INTO tournaments (name, date) VALUES (?, ?)', [args.name, args.date], (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Tournament created');
+    }
+  });
+});
+
+// Get tournaments
+ipcMain.handle('get-tournaments', async (event, args) => {
+  return new Promise((resolve, reject) => {
+    db.all('SELECT * FROM tournaments', (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
 });
