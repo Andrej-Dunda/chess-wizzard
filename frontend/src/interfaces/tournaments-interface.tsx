@@ -1,11 +1,11 @@
 export interface iTournament {
-  id: string;
+  id: number;
   name: string;
   date: string;
   participants: iParticipant[];
 }
 
 export interface iParticipant {
-  id: string;
+  id: number;
   name: string;
 }

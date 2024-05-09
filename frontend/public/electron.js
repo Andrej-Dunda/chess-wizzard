@@ -93,6 +93,28 @@ ipcMain.on('create-tournament', (event, args) => {
   });
 });
 
+// Update tournament
+ipcMain.handle('put-tournament', (event, args) => {
+  db.run('UPDATE tournaments SET name = ? WHERE id = ?', [args.name, args.id], (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Tournament updated');
+    }
+  });
+});
+
+// Delete tournament
+ipcMain.on('delete-tournament', (event, args) => {
+  db.run('DELETE FROM tournaments WHERE id = ?', [args.id], (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Tournament deleted');
+    }
+  });
+});
+
 // Get tournaments
 ipcMain.handle('get-tournaments', async (event, args) => {
   return new Promise((resolve, reject) => {

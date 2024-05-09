@@ -1,0 +1,16 @@
+.new-tournament-modal-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+
+    #new-tournament-name-input {
+      width: 100%;
+    }
+
+    .submit-button {
+        width: 100%;
+        height: 40px;
+    }
+}

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import React from 'react';
-import { iParticipant, iTournament } from '../interfaces/tournaments-interface';
+import { iTournament } from '../interfaces/tournaments-interface';
 import { useSnackbar } from './SnackbarProvider';
 // import { v4 as uuidv4 } from 'uuid';
 
@@ -12,9 +12,9 @@ type TournamentsContextType = {
 
   getTournaments: () => void;
   postTournament: (newTournamentName: string) => void;
-  getTournament: (tournamentId: string) => void;
-  putTournament: (tournamentId: string, tournamentName: string, participants: iParticipant[]) => void;
-  deleteTournament: (tournamentId: string) => void;
+  getTournament: (tournamentId: number) => void;
+  putTournament: (tournamentId: number, tournamentName: string) => void;
+  deleteTournament: (tournamentId: number) => void;
 };
 
 export const TournamentsContext = createContext<TournamentsContextType | null>(null);
@@ -141,6 +141,10 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     getTournaments()
   }, []);
 
+  useEffect(() => {
+    console.log(tournaments)
+  }, [tournaments])
+
   const getTournaments = async () => {
     const tournamentsData = await window.api.getTournaments();
     tournamentsData && setTournaments(tournamentsData)
@@ -158,29 +162,19 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     }
   }
 
-  const getTournament = (tournamentId: string) => {
+  const getTournament = (tournamentId: number) => {
     setSelectedTournament(tournaments.find(tournament => tournament.id === tournamentId))
   }
 
-  const putTournament = (tournamentId: string, tournamentName: string, tournamentParticipants: iParticipant[]) => {
-    const updatedTournaments = tournaments.map(tournament => {
-      if (tournament.id === tournamentId) {
-        return {
-          ...tournament,
-          name: tournamentName,
-          participants: tournamentParticipants
-        }
-      }
-      return tournament
-    })
-    console.log(updatedTournaments)
-    setTournaments(updatedTournaments)
-    setSelectedTournament(updatedTournaments.find(tournament => tournament.id === tournamentId))
+  const putTournament = async (tournamentId: number, tournamentName: string) => {
+    await window.api.putTournament({ id: tournamentId, name: tournamentName })
+    getTournaments()
+    openSnackbar('Turnaj upraven!')
   }
 
-  const deleteTournament = (tournamentId: string) => {
-    const updatedTournaments = tournaments.filter(tournament => tournament.id !== tournamentId)
-    setTournaments(updatedTournaments)
+  const deleteTournament = async (tournamentId: number) => {
+    await window.api.deleteTournament({ id: tournamentId })
+    getTournaments()
     openSnackbar('Turnaj smazán!')
   }
 

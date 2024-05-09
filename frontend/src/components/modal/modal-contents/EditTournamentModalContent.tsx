@@ -28,8 +28,17 @@ const EditTournamentModalContent = ({tournament}: EditTournamentModalContentProp
       newTournamentNameInputRef.current?.focus()
       return
     }
+    else if (newTournamentName.length > 50) {
+      setEditTournamentModalError('Název turnaje nesmí být delší než 50 znaků!')
+      newTournamentNameInputRef.current?.focus()
+      return
+    }
+    else if (newTournamentName === tournament.name) {
+      closeModal()
+      return
+    }
 
-    putTournament(tournament.id, newTournamentName, tournament.participants)
+    putTournament(tournament.id, newTournamentName)
     closeModal()
   }
 
@@ -39,7 +48,7 @@ const EditTournamentModalContent = ({tournament}: EditTournamentModalContentProp
 
   return (
     <div className="edit-tournament-modal-content">
-      <h1 className='title'>Upravit materiál</h1>
+      <h1 className='title'>Upravit turnaj</h1>
       <div className='tournament-wrapper'>
         <div className="name-input-wrapper">
           <label htmlFor="tournament-name-input">Název turnaje:</label>

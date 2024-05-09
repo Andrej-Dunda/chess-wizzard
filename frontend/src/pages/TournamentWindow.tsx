@@ -11,25 +11,25 @@ const TournamentWindow = () => {
   const [newParticipantName, setNewParticipantName] = useState<string>('');
   const grayscale900 = getComputedStyle(document.documentElement).getPropertyValue('--grayscale-900').trim();
 
-  const generateRandomString = (length: number) => {
-    return Math.random().toString(36).substring(2, 2 + length);
+  const generateRandomIndex = () => {
+    return Math.floor(Math.random() * 100)
   }
 
-  const onNewParticipantInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      if (!newParticipantName.trim()) {
-        return
-      }
+  // const onNewParticipantInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === 'Enter') {
+  //     if (!newParticipantName.trim()) {
+  //       return
+  //     }
 
-      selectedTournament && putTournament(selectedTournament.id, selectedTournament.name, [...selectedTournament.participants, {id: generateRandomString(10), name: newParticipantName}])
-      setNewParticipantName('')
-      newParticipantInputRef.current?.focus()
-    }
-  }
+  //     selectedTournament && putTournament(selectedTournament.id, selectedTournament.name, [...selectedTournament.participants, {id: generateRandomIndex(), name: newParticipantName}])
+  //     setNewParticipantName('')
+  //     newParticipantInputRef.current?.focus()
+  //   }
+  // }
 
-  const removeParticipant = (participantId: string) => {
-    selectedTournament && putTournament(selectedTournament.id, selectedTournament.name, selectedTournament.participants.filter(participant => participant.id !== participantId))
-  }
+  // const removeParticipant = (participantId: number) => {
+  //   selectedTournament && putTournament(selectedTournament.id, selectedTournament.name, selectedTournament.participants.filter(participant => participant.id !== participantId))
+  // }
 
   return (
     <div className='tournament-window'>
@@ -47,7 +47,7 @@ const TournamentWindow = () => {
             onChange={(e) => setNewParticipantName(e.target.value)}
             placeholder="Nový účastník..."
             ref={newParticipantInputRef}
-            onKeyDown={onNewParticipantInputKeyDown}
+            // onKeyDown={onNewParticipantInputKeyDown}
           />
           {selectedTournament?.participants.length ? (
           <div className="participants">
@@ -55,7 +55,7 @@ const TournamentWindow = () => {
               {selectedTournament?.participants.sort().map((participant: iParticipant, index) => (
                 <div key={index} className="participant">
                   <span className="participant-name">{participant.name}</span>
-                  <FontAwesomeIcon icon={faXmark} color={grayscale900} className='remove-icon' onClick={() => removeParticipant(participant.id)} />
+                  {/* <FontAwesomeIcon icon={faXmark} color={grayscale900} className='remove-icon' onClick={() => removeParticipant(participant.id)} /> */}
                 </div>
               ))}
             </div>
