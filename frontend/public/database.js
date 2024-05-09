@@ -20,29 +20,8 @@ const db = new sqlite3.Database(
 );
 
 // db initialization
-db.get("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='tournaments'", (err, row) => {
-  if (err) {
-    console.error(err.message);
-  }
-  if (row['count(*)'] === 0) {
-    db.serialize(() => {
-      db.run('CREATE TABLE IF NOT EXISTS tournaments (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, date TEXT)');
-      db.run('INSERT INTO tournaments (name, date) VALUES ("Tournament 1", "2021-01-01")');
-      db.run('INSERT INTO tournaments (name, date) VALUES ("Tournament 2", "2024-01-01")');
-    });
-  } else {
-    db.get("SELECT count(*) FROM tournaments", (err, row) => {
-      if (err) {
-        console.error(err.message);
-      }
-      if (row['count(*)'] === 0) {
-        db.serialize(() => {
-          db.run('INSERT INTO tournaments (name, date) VALUES ("Tournament 1", "2021-01-01")');
-          db.run('INSERT INTO tournaments (name, date) VALUES ("Tournament 2", "2024-01-01")');
-        });
-      }
-    });
-  }
+db.serialize(() => {
+  db.run('CREATE TABLE IF NOT EXISTS tournaments (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, date TEXT, players_table_name TEXT)');
 });
 
 module.exports = db;

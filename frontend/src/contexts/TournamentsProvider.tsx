@@ -14,7 +14,7 @@ type TournamentsContextType = {
   postTournament: (newTournamentName: string) => void;
   getTournament: (tournamentId: number) => void;
   putTournament: (tournamentId: number, tournamentName: string) => void;
-  deleteTournament: (tournamentId: number) => void;
+  deleteTournament: (tournament: iTournament) => void;
 };
 
 export const TournamentsContext = createContext<TournamentsContextType | null>(null);
@@ -172,8 +172,8 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     openSnackbar('Turnaj upraven!')
   }
 
-  const deleteTournament = async (tournamentId: number) => {
-    await window.api.deleteTournament({ id: tournamentId })
+  const deleteTournament = async (tournament: iTournament) => {
+    await window.api.deleteTournament({ id: tournament.id, players_table_name: tournament.players_table_name })
     getTournaments()
     openSnackbar('Turnaj smazán!')
   }
@@ -188,7 +188,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     postTournament,
     getTournament,
     putTournament,
-    deleteTournament: deleteTournament
+    deleteTournament
   };
 
   return (

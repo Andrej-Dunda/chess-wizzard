@@ -3,7 +3,6 @@ import { useTournaments } from '../contexts/TournamentsProvider'
 import './TournamentWindow.scss'
 import React, { useRef, useState } from 'react'
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
-import { iParticipant } from '../interfaces/tournaments-interface';
 
 const TournamentWindow = () => {
   const { selectedTournament, putTournament } = useTournaments();
@@ -33,7 +32,7 @@ const TournamentWindow = () => {
 
   return (
     <div className='tournament-window'>
-      <div className="tournament-window-header">
+      {/* <div className="tournament-window-header">
         <h5 className="tournament-title">{selectedTournament?.name}</h5>
         <span className='tournament-date'>{selectedTournament?.date}</span>
       </div>
@@ -47,7 +46,7 @@ const TournamentWindow = () => {
             onChange={(e) => setNewParticipantName(e.target.value)}
             placeholder="Nový účastník..."
             ref={newParticipantInputRef}
-            // onKeyDown={onNewParticipantInputKeyDown}
+            onKeyDown={onNewParticipantInputKeyDown}
           />
           {selectedTournament?.participants.length ? (
           <div className="participants">
@@ -55,7 +54,7 @@ const TournamentWindow = () => {
               {selectedTournament?.participants.sort().map((participant: iParticipant, index) => (
                 <div key={index} className="participant">
                   <span className="participant-name">{participant.name}</span>
-                  {/* <FontAwesomeIcon icon={faXmark} color={grayscale900} className='remove-icon' onClick={() => removeParticipant(participant.id)} /> */}
+                  <FontAwesomeIcon icon={faXmark} color={grayscale900} className='remove-icon' onClick={() => removeParticipant(participant.id)} />
                 </div>
               ))}
             </div>
@@ -64,7 +63,7 @@ const TournamentWindow = () => {
           <span>Zatím žádní účastníci...</span>
         )}
         </section>
-      </div>
+      </div> */}
     </div>
   )
 }

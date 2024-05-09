@@ -80,15 +80,29 @@ if (isDev) {
   });
 }
 
+// players table name generator based on tournament name without spaces and a random string
+const generatePlayersTableName = (tournamentName) => {
+  return 'players_' + tournamentName.replace(/\s/g, '_') + '_' + Math.random().toString(36).substring(7);
+}
+
 // IPC communication
 
 // Create tournament
 ipcMain.on('create-tournament', (event, args) => {
-  db.run('INSERT INTO tournaments (name, date) VALUES (?, ?)', [args.name, args.date], (err) => {
+  const playersTableName = generatePlayersTableName(args.name);
+  db.run('INSERT INTO tournaments (name, date, players_table_name) VALUES (?, ?, ?)', [args.name, args.date, playersTableName], (err) => {
     if (err) {
       console.log(err);
     } else {
       console.log('Tournament created');
+    }
+  });
+  // Create players table
+  db.run(`CREATE TABLE ${playersTableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, rating INTEGER)`, (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Players table created');
     }
   });
 });
@@ -111,6 +125,13 @@ ipcMain.on('delete-tournament', (event, args) => {
       console.log(err);
     } else {
       console.log('Tournament deleted');
+    }
+  });
+  db.run(`DROP TABLE ${args.players_table_name}`, (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Players table deleted');
     }
   });
 });
