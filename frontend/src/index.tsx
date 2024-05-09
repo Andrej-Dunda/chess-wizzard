@@ -5,7 +5,7 @@ import { ModalProvider } from './contexts/ModalProvider';
 import { NavigationProvider } from './contexts/NavigationProvider';
 import { SnackbarProvider } from './contexts/SnackbarProvider';
 import { TournamentsProvider } from './contexts/TournamentsProvider';
-import { BrowserRouter as Router } from 'react-router-dom'
+import { HashRouter as Router } from 'react-router-dom'
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

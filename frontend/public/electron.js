@@ -28,11 +28,11 @@ const createWindow = () => {
   );
 
 	// In development mode, if the window has loaded, then load the dev tools.
-  if (isDev) {
+  // if (isDev) {
     mainWindow.webContents.on('did-frame-finish-load', () => {
       mainWindow.webContents.openDevTools({ mode: 'detach' });
     });
-  }
+  // }
 };
 
 // When the app is ready to load
@@ -98,7 +98,7 @@ ipcMain.on('create-tournament', (event, args) => {
     }
   });
   // Create players table
-  db.run(`CREATE TABLE ${playersTableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, rating INTEGER)`, (err) => {
+  db.run(`CREATE TABLE ${playersTableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)`, (err) => {
     if (err) {
       console.log(err);
     } else {
@@ -108,7 +108,7 @@ ipcMain.on('create-tournament', (event, args) => {
 });
 
 // Update tournament
-ipcMain.handle('put-tournament', (event, args) => {
+ipcMain.on('put-tournament', (event, args) => {
   db.run('UPDATE tournaments SET name = ? WHERE id = ?', [args.name, args.id], (err) => {
     if (err) {
       console.log(err);
@@ -146,5 +146,41 @@ ipcMain.handle('get-tournaments', async (event, args) => {
         resolve(rows);
       }
     });
+  });
+});
+
+// Get players
+ipcMain.handle('get-players', async (event, args) => {
+  return new Promise((resolve, reject) => {
+    db.all(`SELECT * FROM ${args.players_table_name}`, (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+});
+
+// Add player
+ipcMain.on('add-player', (event, args) => {
+  console.log(args.name, args.players_table_name)
+  db.run(`INSERT INTO ${args.players_table_name} (name) VALUES (?)`, [args.name], (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Player added');
+    }
+  });
+});
+
+// Remove player
+ipcMain.on('remove-player', (event, args) => {
+  db.run(`DELETE FROM ${args.players_table_name} WHERE id = ?`, [args.id], (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Player removed');
+    }
   });
 });

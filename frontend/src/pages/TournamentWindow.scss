@@ -17,7 +17,7 @@
     align-items: center;
     padding: 32px;
 
-    .participants-section {
+    .players-section {
       min-width: fit-content;
       width: 500px;
       max-height: 100%;
@@ -33,14 +33,14 @@
       -webkit-box-shadow: 1px 1px 8px 1px rgba(0, 0, 0, 0.31);
       -moz-box-shadow: 1px 1px 8px 1px rgba(0, 0, 0, 0.31);
 
-      .participants {
+      .players {
         border: 1px solid var(--grayscale-150);
         border-radius: 8px;
         max-height: calc(100vh - 112px);
         overflow: auto;
 
-        .participants-wrapper {
-          .participant {
+        .players-wrapper {
+          .player {
             padding: 8px;
             border-bottom: 1px solid var(--grayscale-150);
   
