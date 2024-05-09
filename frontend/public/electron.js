@@ -74,6 +74,12 @@ process.on('uncaughtException', (error) => {
   }
 });
 
+if (isDev) {
+  require('electron-reload')(__dirname, {
+    electron: require(`${__dirname}/src`)
+  });
+}
+
 // IPC communication
 
 // Create tournament
