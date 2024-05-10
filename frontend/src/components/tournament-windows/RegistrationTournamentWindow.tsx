@@ -17,14 +17,14 @@ const RegistrationTournamentWindow = () => {
         return
       }
 
-      selectedTournament && addTournamentPlayer(selectedTournament.players_table_name, newPlayerName)
+      selectedTournament && addTournamentPlayer(selectedTournament.playersTableName, newPlayerName)
       setNewPlayerName('')
       newPlayerInputRef.current?.focus()
     }
   }
 
   const removePlayer = (playerId: number) => {
-    selectedTournament && removeTournamentPlayer(selectedTournament.players_table_name, playerId)
+    selectedTournament && removeTournamentPlayer(selectedTournament.playersTableName, playerId)
   }
 
   return (

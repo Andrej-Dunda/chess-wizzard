@@ -4,10 +4,14 @@ export interface iTournament {
   date: string;
   phase: string;
   round: number;
-  players_table_name: string;
+  playersTableName: string;
 }
 
 export interface iTournamentPlayer {
   id: number;
   name: string;
+  startPosition: number;
+  score: number;
+  bucholz: number;
+  sonnenbornBerger: number;
 }

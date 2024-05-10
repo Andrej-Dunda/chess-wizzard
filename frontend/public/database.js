@@ -21,7 +21,7 @@ const db = new sqlite3.Database(
 
 // db initialization
 db.serialize(() => {
-  db.run('CREATE TABLE IF NOT EXISTS tournaments (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, date TEXT, players_table_name TEXT, phase TEXT, round INTEGER)');
+  db.run('CREATE TABLE IF NOT EXISTS tournaments (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, date TEXT, playersTableName TEXT, phase TEXT, round INTEGER)');
 });
 
 module.exports = db;

@@ -18,9 +18,9 @@ type TournamentsContextType = {
 
   tournamentPlayers: iTournamentPlayer[];
   setTournamentPlayers: React.Dispatch<React.SetStateAction<iTournamentPlayer[]>>;
-  getTournamentPlayers: (players_table_name: string) => void;
-  addTournamentPlayer: (players_table_name: string, newPlayerName: string) => void;
-  removeTournamentPlayer: (players_table_name: string, playerId: number) => void;
+  getTournamentPlayers: (playersTableName: string) => void;
+  addTournamentPlayer: (playersTableName: string, newPlayerName: string) => void;
+  removeTournamentPlayer: (playersTableName: string, playerId: number) => void;
 };
 
 export const TournamentsContext = createContext<TournamentsContextType | null>(null);
@@ -155,7 +155,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
 
   useEffect(() => {
     if (selectedTournament) {
-      getTournamentPlayers(selectedTournament.players_table_name);
+      getTournamentPlayers(selectedTournament.playersTableName);
       localStorage.setItem('selectedTournamentId', selectedTournament.id.toString());
     }
   }, [selectedTournament]);
@@ -187,7 +187,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   }
 
   const deleteTournament = async (tournament: iTournament) => {
-    await window.api.deleteTournament({ id: tournament.id, players_table_name: tournament.players_table_name })
+    await window.api.deleteTournament({ id: tournament.id, playersTableName: tournament.playersTableName })
     getTournaments()
     openSnackbar('Turnaj smazán!')
   }
@@ -199,19 +199,19 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     }
   }
 
-  const getTournamentPlayers = async (players_table_name: string) => {
-    setTournamentPlayers(await window.api.getPlayers({ players_table_name: players_table_name }))
+  const getTournamentPlayers = async (playersTableName: string) => {
+    setTournamentPlayers(await window.api.getPlayers({ playersTableName: playersTableName }))
   }
 
-  const addTournamentPlayer = async (players_table_name: string, newPlayerName: string) => {
-    await window.api.addPlayer({ players_table_name: players_table_name, name: newPlayerName })
-    getTournamentPlayers(players_table_name)
+  const addTournamentPlayer = async (playersTableName: string, newPlayerName: string) => {
+    await window.api.addPlayer({ playersTableName: playersTableName, name: newPlayerName })
+    getTournamentPlayers(playersTableName)
     openSnackbar('Hráč přidán!')
   }
 
-  const removeTournamentPlayer = async (players_table_name: string, playerId: number) => {
-    await window.api.removePlayer({ players_table_name: players_table_name, id: playerId })
-    getTournamentPlayers(players_table_name)
+  const removeTournamentPlayer = async (playersTableName: string, playerId: number) => {
+    await window.api.removePlayer({ playersTableName: playersTableName, id: playerId })
+    getTournamentPlayers(playersTableName)
     openSnackbar('Hráč odebrán!')
   }
 

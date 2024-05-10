@@ -90,7 +90,7 @@ const generatePlayersTableName = (tournamentName) => {
 // Create tournament
 ipcMain.on('create-tournament', (event, args) => {
   const playersTableName = generatePlayersTableName(args.name);
-  db.run('INSERT INTO tournaments (name, date, players_table_name, phase, round) VALUES (?, ?, ?, ?, ?)', [args.name, args.date, playersTableName, 'registration', 1], (err) => {
+  db.run('INSERT INTO tournaments (name, date, playersTableName, phase, round) VALUES (?, ?, ?, ?, ?)', [args.name, args.date, playersTableName, 'registration', 1], (err) => {
     if (err) {
       console.log(err);
     } else {
@@ -127,7 +127,7 @@ ipcMain.on('delete-tournament', (event, args) => {
       console.log('Tournament deleted');
     }
   });
-  db.run(`DROP TABLE ${args.players_table_name}`, (err) => {
+  db.run(`DROP TABLE ${args.playersTableName}`, (err) => {
     if (err) {
       console.log(err);
     } else {
@@ -176,7 +176,7 @@ ipcMain.on('change-tournament-phase', (event, args) => {
 // Get players
 ipcMain.handle('get-players', async (event, args) => {
   return new Promise((resolve, reject) => {
-    db.all(`SELECT * FROM ${args.players_table_name}`, (err, rows) => {
+    db.all(`SELECT * FROM ${args.playersTableName}`, (err, rows) => {
       if (err) {
         reject(err);
       } else {
@@ -188,7 +188,7 @@ ipcMain.handle('get-players', async (event, args) => {
 
 // Add player
 ipcMain.on('add-player', (event, args) => {
-  db.run(`INSERT INTO ${args.players_table_name} (name) VALUES (?)`, [args.name], (err) => {
+  db.run(`INSERT INTO ${args.playersTableName} (name) VALUES (?)`, [args.name], (err) => {
     if (err) {
       console.log(err);
     } else {
@@ -199,7 +199,7 @@ ipcMain.on('add-player', (event, args) => {
 
 // Remove player
 ipcMain.on('remove-player', (event, args) => {
-  db.run(`DELETE FROM ${args.players_table_name} WHERE id = ?`, [args.id], (err) => {
+  db.run(`DELETE FROM ${args.playersTableName} WHERE id = ?`, [args.id], (err) => {
     if (err) {
       console.log(err);
     } else {
