@@ -188,7 +188,6 @@ ipcMain.handle('get-players', async (event, args) => {
 
 // Add player
 ipcMain.on('add-player', (event, args) => {
-  console.log(args.name, args.players_table_name)
   db.run(`INSERT INTO ${args.players_table_name} (name) VALUES (?)`, [args.name], (err) => {
     if (err) {
       console.log(err);

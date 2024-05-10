@@ -1,3 +1,136 @@
 .playtime-tournament-window {
-  
+  display: grid;
+  grid-template-rows: 56px 1fr;
+
+  .tournament-window-header {
+    display: flex;
+    justify-content: space-between;
+
+    border-bottom: 1px solid var(--grayscale-150);
+
+    .tournament-title {
+      width: 150px;
+      padding: 16px;
+    }
+
+    .tournament-round {
+      width: 150px;
+      padding: 16px;
+      text-align: right;
+    }
+
+    .results-toggle {
+      height: 100%;
+
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 8px;
+
+      font-size: 17px;
+
+      .toggle-button {
+        padding: 8px;
+
+        &.active {
+          font-weight: 900;
+          border-bottom: 2px solid var(--grayscale-900);
+        }
+      }
+    }
+  }
+
+  .tournament-window-body {
+    height: calc(100vh - 112px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px;
+    gap: 24px;
+
+    .results-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+
+      .h4 {
+        text-align: center;
+      }
+
+      .table-wrapper {
+        border-radius: 8px;
+        overflow: hidden;
+
+        .results-table {
+          width: 500px;
+          border-collapse: collapse;
+
+          .heading-row {
+            background-color: var(--grayscale-150);
+
+            th {
+              font-size: 18px;
+              padding: 8px 16px;
+
+              &.text-left {
+                text-align: left;
+              }
+            }
+          }
+
+          .player-row {
+            td {
+              font-size: 18px;
+              padding: 8px 16px;
+
+              &.name {
+                width: 200px;
+              }
+
+              &.text-right {
+                text-align: right;
+              }
+
+              &.text-center {
+                text-align: center;
+              }
+            }
+
+
+            &:nth-child(even) {
+              background-color: var(--grayscale-150);
+
+              &:first-child {
+                border-top-left-radius: 8px;
+                border-bottom-left-radius: 8px;
+              }
+
+              &:last-child {
+                border-top-right-radius: 8px;
+                border-bottom-right-radius: 8px;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .control-panel {
+      width: 500px;
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+
+      button {
+        width: 150px;
+        padding: 8px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+
+        font-weight: 500;
+      }
+    }
+  }
 }

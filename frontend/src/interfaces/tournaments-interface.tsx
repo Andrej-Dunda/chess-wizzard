@@ -3,6 +3,7 @@ export interface iTournament {
   name: string;
   date: string;
   phase: string;
+  round: number;
   players_table_name: string;
 }
 
