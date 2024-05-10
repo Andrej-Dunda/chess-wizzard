@@ -22,12 +22,12 @@ const TournamentWindow = () => {
   return (
     <>
       {
-        selectedTournament ? (
+        selectedTournament && (
           selectedTournament.phase === 'registration' ? <RegistrationTournamentWindow />
           : selectedTournament.phase === 'playtime' ? <PlaytimeTournamentWindow />
           : selectedTournament.phase === 'finished' ? <FinishedTournamentWindow />
           : <ToTournamentOverview />
-        ) : <ToTournamentOverview />
+        )
       }
     </>
   )

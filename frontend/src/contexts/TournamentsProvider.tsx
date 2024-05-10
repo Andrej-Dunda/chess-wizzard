@@ -148,12 +148,22 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   }, [tournamentPlayers])
 
   useEffect(() => {
-    getTournaments()
+    getTournaments();
+  
+    const selectedTournamentId = localStorage.getItem('selectedTournamentId');
+    if (selectedTournamentId) {
+      console.log(parseInt(selectedTournamentId))
+      getTournament(parseInt(selectedTournamentId));
+    }
   }, []);
 
   useEffect(() => {
-    selectedTournament && getTournamentPlayers(selectedTournament.players_table_name)
-  }, [selectedTournament])
+    if (selectedTournament) {
+      getTournamentPlayers(selectedTournament.players_table_name);
+      console.log('selectedTournamentId', selectedTournament.id.toString())
+      localStorage.setItem('selectedTournamentId', selectedTournament.id.toString());
+    }
+  }, [selectedTournament]);
 
   const getTournaments = async () => {
     const tournamentsData = await window.api.getTournaments();
