@@ -3,20 +3,13 @@ import './PlaytimeTournamentWindow.scss'
 import React from 'react'
 
 const PlaytimeTournamentWindow = () => {
-  const { selectedTournament, getTournament } = useTournaments();
-
-  const finishTournament = async () => {
-    console.log('finish tournament')
-    if (selectedTournament) {
-      await window.api.changeTournamentPhase({ id: selectedTournament.id, phase: 'finished' })
-      getTournament(selectedTournament.id)
-    }
-  }
+  const { changeTournamentPhase } = useTournaments();
 
   return (
     <div className='playtime-tournament-window'>
       playtime tournament window
-      <button onClick={finishTournament}>finish tournament</button>
+      <button className='finish-tournament-button dark' onClick={() => changeTournamentPhase('finished')}>finish tournament</button>
+      <button className='back-to-registration dark' onClick={() => changeTournamentPhase('registration')}>back to registration</button>
     </div>
   )
 }
