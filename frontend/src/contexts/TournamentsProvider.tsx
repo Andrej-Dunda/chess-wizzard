@@ -172,8 +172,8 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     }
   }
 
-  const getTournament = (tournamentId: number) => {
-    setSelectedTournament(tournaments.find(tournament => tournament.id === tournamentId))
+  const getTournament = async (tournamentId: number) => {
+    setSelectedTournament(await window.api.getTournament({ id: tournamentId }))
   }
 
   const putTournament = async (tournamentId: number, tournamentName: string) => {

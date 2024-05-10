@@ -90,7 +90,7 @@ const generatePlayersTableName = (tournamentName) => {
 // Create tournament
 ipcMain.on('create-tournament', (event, args) => {
   const playersTableName = generatePlayersTableName(args.name);
-  db.run('INSERT INTO tournaments (name, date, players_table_name) VALUES (?, ?, ?)', [args.name, args.date, playersTableName], (err) => {
+  db.run('INSERT INTO tournaments (name, date, players_table_name, phase, round) VALUES (?, ?, ?, ?, ?)', [args.name, args.date, playersTableName, 'registration', 1], (err) => {
     if (err) {
       console.log(err);
     } else {
@@ -148,6 +148,30 @@ ipcMain.handle('get-tournaments', async (event, args) => {
     });
   });
 });
+
+// Get tournament
+ipcMain.handle('get-tournament', async (event, args) => {
+  return new Promise((resolve, reject) => {
+    db.get('SELECT * FROM tournaments WHERE id = ?', [args.id], (err, row) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(row);
+      }
+    });
+  });
+});
+
+// Change tournament phase
+ipcMain.on('change-tournament-phase', (event, args) => {
+  db.run('UPDATE tournaments SET phase = ? WHERE id = ?', [args.phase, args.id], (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Tournament updated');
+    }
+  });
+})
 
 // Get players
 ipcMain.handle('get-players', async (event, args) => {
