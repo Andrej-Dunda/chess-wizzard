@@ -50,8 +50,13 @@
             text-overflow: ellipsis;
             text-wrap: nowrap;
 
+            .start-position {
+              min-width: fit-content;
+            }
+
             &.name {
               min-width: 200px;
+              max-width: 30vw;
             }
 
             &.width-s {

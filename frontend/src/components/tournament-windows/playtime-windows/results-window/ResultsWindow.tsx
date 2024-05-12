@@ -15,7 +15,7 @@ const ResultsWindow = () => {
           <thead>
             <tr className='heading-row'>
               {!firstRound && <th className='width-s text-right' title='Pořadí'>#</th>}
-              <th className='width-s text-center' title='Startovní číslo'>St.č.</th>
+              <th className='start-position text-center' title='Startovní číslo'>St.č.</th>
               <th className='text-left'>Jméno</th>
               <th className='with-m text-center' title='Body'>B</th>
               <th className='with-m text-center' title='Sonnenborn-Berger'>SB</th>
