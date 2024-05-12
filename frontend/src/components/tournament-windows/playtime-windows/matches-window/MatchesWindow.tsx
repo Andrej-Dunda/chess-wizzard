@@ -17,22 +17,22 @@ const MatchesWindow = () => {
         <table className="matches">
           <thead>
             <tr className="matches-heading">
-              <th className="board-number width-s text-right">Č.</th>
-              <th className="start-position width-s text-right">St.č.</th>
+              <th className="board-number width-s text-center">Stůl</th>
+              <th className="start-position width-s text-center">St.č.</th>
               <th className="name text-left">Bílý</th>
               <th className="score text-center">B</th>
               <th className="result text-center">Výsledek</th>
               <th className="score text-center">B</th>
               <th className="name text-left">Černý</th>
-              <th className="start-position width-s text-right">St.č.</th>
+              <th className="start-position width-s text-center">St.č.</th>
             </tr>
           </thead>
           <tbody>
             {
               matches.map((match, index) => (
                 <tr key={index} className={`match${selectedMatchIndex === index ? ' selected' : ''}`} onClick={() => setSelectedMatchIndex(index)}>
-                  <td className="board-number width-s text-right">{match.boardNumber}</td>
-                  <td className="start-position width-s text-right">{match.whitePlayer.startPosition}</td>
+                  <td className="board-number width-s text-center">{match.boardNumber}</td>
+                  <td className="start-position width-s text-center">{match.whitePlayer.startPosition}</td>
                   <td className="name text-left">{match.whitePlayer.name}</td>
                   <td className="score text-center">{match.whitePlayer.score}</td>
                   <td className="result text-center">
@@ -44,7 +44,7 @@ const MatchesWindow = () => {
                    </td>
                   <td className="score text-center">{match.blackPlayer.score}</td>
                   <td className="name text-left">{match.blackPlayer.name}</td>
-                  <td className="start-position width-s text-right">{match.blackPlayer.startPosition}</td>
+                  <td className="start-position width-s text-center">{match.blackPlayer.startPosition}</td>
                 </tr>
               ))
             }

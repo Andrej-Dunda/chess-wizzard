@@ -252,8 +252,11 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     const newMatches = [...matches]
     newMatches[selectedMatchIndex].result = result
     setMatches(newMatches)
-    selectedMatchIndex < matches.length - 1 && setSelectedMatchIndex(selectedMatchIndex + 1)
-    console.log(result)
+    // find next match with null result after the selectedMatchIndex
+    const nextMatchIndex = matches.findIndex((match, index) => index > selectedMatchIndex && match.result === null)
+    // if nextMatchIndex is -1, find first match with null result
+    setSelectedMatchIndex(nextMatchIndex === -1 ? matches.findIndex(match => match.result === null) : nextMatchIndex)
+    // selectedMatchIndex < matches.length - 1 && setSelectedMatchIndex(selectedMatchIndex + 1)
   }
 
   const contextValue: TournamentsContextType = {

@@ -1,15 +1,17 @@
 import './RegistrationTournamentWindow.scss'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useRef, useState } from 'react'
-import { faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { useTournaments } from '../../contexts/TournamentsProvider';
 import { iTournamentPlayer } from '../../interfaces/tournaments-interface';
+import { useNav } from '../../contexts/NavigationProvider';
 
 const RegistrationTournamentWindow = () => {
   const { selectedTournament, tournamentPlayers, addTournamentPlayer, removeTournamentPlayer, changeTournamentPhase, changeTournamentRound } = useTournaments();
   const newPlayerInputRef = useRef<HTMLInputElement>(null);
   const [newPlayerName, setNewPlayerName] = useState<string>('');
   const grayscale900 = getComputedStyle(document.documentElement).getPropertyValue('--grayscale-900').trim();
+  const { toHome } = useNav();
 
   const onNewPlayerInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -36,7 +38,8 @@ const RegistrationTournamentWindow = () => {
     <div className='registration-tournament-window'>
       <div className="tournament-window-header">
         <h5 className="tournament-title">{selectedTournament?.name}</h5>
-        <span className='tournament-date'>{selectedTournament && new Date(selectedTournament.date).toLocaleDateString()}</span>
+        {/* <span className='tournament-date'>{selectedTournament && new Date(selectedTournament.date).toLocaleDateString()}</span> */}
+        <FontAwesomeIcon className='home-button' onClick={toHome} icon={faHome} />
       </div>
       <div className="tournament-window-body">
         <section className="players-section">
