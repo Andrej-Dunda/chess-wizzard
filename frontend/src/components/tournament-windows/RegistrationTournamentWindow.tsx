@@ -6,7 +6,7 @@ import { useTournaments } from '../../contexts/TournamentsProvider';
 import { iTournamentPlayer } from '../../interfaces/tournaments-interface';
 
 const RegistrationTournamentWindow = () => {
-  const { selectedTournament, tournamentPlayers, addTournamentPlayer, removeTournamentPlayer, changeTournamentPhase } = useTournaments();
+  const { selectedTournament, tournamentPlayers, addTournamentPlayer, removeTournamentPlayer, changeTournamentPhase, changeTournamentRound } = useTournaments();
   const newPlayerInputRef = useRef<HTMLInputElement>(null);
   const [newPlayerName, setNewPlayerName] = useState<string>('');
   const grayscale900 = getComputedStyle(document.documentElement).getPropertyValue('--grayscale-900').trim();
@@ -25,6 +25,11 @@ const RegistrationTournamentWindow = () => {
 
   const removePlayer = (playerId: number) => {
     selectedTournament && removeTournamentPlayer(selectedTournament.playersTableName, playerId)
+  }
+
+  const startTournament = async () => {
+    await changeTournamentRound(1)
+    changeTournamentPhase('playtime')
   }
 
   return (
@@ -58,7 +63,7 @@ const RegistrationTournamentWindow = () => {
                 </div>
               </div>
               {tournamentPlayers.length > 1 && (
-                <button className="close-registration-button dark" onClick={() => changeTournamentPhase('playtime')}>Uzavřít registraci hráčů</button>
+                <button className="close-registration-button dark" onClick={startTournament}>Uzavřít registraci hráčů</button>
               )}
             </>
           ) : (

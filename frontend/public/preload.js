@@ -11,7 +11,8 @@ contextBridge.exposeInMainWorld('api', {
   putTournament: (args) => ipcRenderer.send('put-tournament', args),
   addPlayer: (args) => ipcRenderer.send('add-player', args),
   removePlayer: (args) => ipcRenderer.send('remove-player', args),
-  changeTournamentPhase: (args) => ipcRenderer.send('change-tournament-phase', args)
+  changeTournamentPhase: (args) => ipcRenderer.send('change-tournament-phase', args),
+  changeTournamentRound: (args) => ipcRenderer.send('change-tournament-round', args),
   // Receive Methods
   // testReceive: (callback) => ipcRenderer.on('test-receive', (event, data) => { callback(data); })
 });

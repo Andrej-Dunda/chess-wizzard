@@ -8,6 +8,7 @@ export interface IElectronAPI {
   removePlayer: (data: any) => Promise<any>,
   changeTournamentPhase: (data: any) => Promise<any>
   getTournament: (data: any) => Promise<any>
+  changeTournamentRound: (data: any) => Promise<any>
 }
 
 declare global {

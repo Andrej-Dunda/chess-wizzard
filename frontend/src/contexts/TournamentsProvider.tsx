@@ -15,6 +15,7 @@ type TournamentsContextType = {
   putTournament: (tournamentId: number, tournamentName: string) => void;
   deleteTournament: (tournament: iTournament) => void;
   changeTournamentPhase: (phase: string) => void;
+  changeTournamentRound: (round: number) => void;
 
   tournamentPlayers: iTournamentPlayer[];
   setTournamentPlayers: React.Dispatch<React.SetStateAction<iTournamentPlayer[]>>;
@@ -199,6 +200,13 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     }
   }
 
+  const changeTournamentRound = async (round: number) => {
+    if (selectedTournament) {
+      await window.api.changeTournamentRound({ id: selectedTournament.id, round: round })
+      getTournament(selectedTournament.id)
+    }
+  }
+
   const getTournamentPlayers = async (playersTableName: string) => {
     setTournamentPlayers(await window.api.getPlayers({ playersTableName: playersTableName }))
   }
@@ -227,6 +235,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     putTournament,
     deleteTournament,
     changeTournamentPhase,
+    changeTournamentRound,
 
     getTournamentPlayers,
     tournamentPlayers,

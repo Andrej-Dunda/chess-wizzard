@@ -90,7 +90,7 @@ const generatePlayersTableName = (tournamentName) => {
 // Create tournament
 ipcMain.on('create-tournament', (event, args) => {
   const playersTableName = generatePlayersTableName(args.name);
-  db.run('INSERT INTO tournaments (name, date, playersTableName, phase, round) VALUES (?, ?, ?, ?, ?)', [args.name, args.date, playersTableName, 'registration', 1], (err) => {
+  db.run('INSERT INTO tournaments (name, date, playersTableName, phase, round) VALUES (?, ?, ?, ?, ?)', [args.name, args.date, playersTableName, 'registration', 0], (err) => {
     if (err) {
       console.log(err);
     } else {
@@ -98,7 +98,7 @@ ipcMain.on('create-tournament', (event, args) => {
     }
   });
   // Create players table
-  db.run(`CREATE TABLE ${playersTableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)`, (err) => {
+  db.run(`CREATE TABLE ${playersTableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, startPosition INTEGER, score REAL, bucholz REAL, sonnenbornBerger REAL)`, (err) => {
     if (err) {
       console.log(err);
     } else {
@@ -167,10 +167,40 @@ ipcMain.on('change-tournament-phase', (event, args) => {
   db.run('UPDATE tournaments SET phase = ? WHERE id = ?', [args.phase, args.id], (err) => {
     if (err) {
       console.log(err);
-    } else {
-      console.log('Tournament updated');
     }
   });
+})
+
+// Change tournament round
+ipcMain.on('change-tournament-round', (event, args) => {
+  db.run('UPDATE tournaments SET round = ? WHERE id = ?', [args.round, args.id], (err) => {
+    if (err) {
+      console.log(err);
+    }
+  });
+
+  if (args.round === 1) {
+    db.get('SELECT playersTableName FROM tournaments WHERE id = ?', [args.id], (err, row) => {
+      if (err) {
+        console.log(err);
+      } else {
+        const playersTableName = row.playersTableName;
+        db.all('SELECT * FROM ' + playersTableName, [], (err, players) => {
+          if (err) {
+            console.log(err);
+          } else {
+            players.map((player, index) => {
+              return db.run('UPDATE ' + playersTableName + ' SET startPosition = ? WHERE id = ?', [index + 1, player.id], (err) => {
+                if (err) {
+                  console.log(err);
+                }
+              })
+            })
+          }
+        })
+      }
+    })
+  }
 })
 
 // Get players
@@ -188,7 +218,7 @@ ipcMain.handle('get-players', async (event, args) => {
 
 // Add player
 ipcMain.on('add-player', (event, args) => {
-  db.run(`INSERT INTO ${args.playersTableName} (name) VALUES (?)`, [args.name], (err) => {
+  db.run(`INSERT INTO ${args.playersTableName} (name, score, bucholz, sonnenbornBerger) VALUES (?, ?, ?, ?)`, [args.name, 0, 0, 0], (err) => {
     if (err) {
       console.log(err);
     } else {

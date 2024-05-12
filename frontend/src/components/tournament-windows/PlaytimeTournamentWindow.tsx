@@ -5,19 +5,23 @@ import React from 'react'
 import { faAnglesLeft, faAnglesRight, faFlagCheckered } from '@fortawesome/free-solid-svg-icons';
 
 const PlaytimeTournamentWindow = () => {
-  const { changeTournamentPhase, selectedTournament, tournamentPlayers } = useTournaments();
+  const { changeTournamentPhase, selectedTournament, tournamentPlayers, changeTournamentRound } = useTournaments();
   const [showResults, setShowResults] = React.useState<boolean>(true);
+  const firstRound: boolean = selectedTournament?.round === 1;
 
-  const backToPreviousRound = () => {
-    console.log('backToPreviousRound')
+  const backToRegistration = async () => {
+    await changeTournamentRound(0)
+    changeTournamentPhase('registration')
   }
+  const previousRound = () => selectedTournament && changeTournamentRound(selectedTournament.round - 1)
+  const nextRound = () => selectedTournament && changeTournamentRound(selectedTournament.round + 1)
 
   return (
     <div className='playtime-tournament-window'>
       <div className="tournament-window-header">
         <h5 className="tournament-title">{selectedTournament?.name}</h5>
         <div className="results-toggle">
-          <button className={`show-results-button toggle-button${showResults ? ' active' : ''}`} onClick={() => setShowResults(true)}>{selectedTournament?.round === 1 ? 'Startovní listina' : 'Výsledky'}</button>
+          <button className={`show-results-button toggle-button${showResults ? ' active' : ''}`} onClick={() => setShowResults(true)}>{firstRound ? 'Startovní listina' : 'Výsledky'}</button>
           <button className={`show-matches-button toggle-button${!showResults ? ' active' : ''}`} onClick={() => setShowResults(false)}>Nasazení</button>
         </div>
         <span className='tournament-round'>{selectedTournament && selectedTournament.round}. kolo</span>
@@ -26,29 +30,29 @@ const PlaytimeTournamentWindow = () => {
         {
           showResults ? (
             <section className='results-section'>
-              <h4 className="h4">{selectedTournament?.round === 1 ? 'Startovní listina' : `Výsledky po ${selectedTournament && selectedTournament.round - 1}. kole`}</h4>
+              <h4 className="h4">{firstRound ? 'Startovní listina' : `Výsledky po ${selectedTournament && selectedTournament.round - 1}. kole`}</h4>
               <div className="table-wrapper">
                 <table className='results-table'>
                   <thead>
                     <tr className='heading-row'>
-                      <th>#</th>
-                      <th>St.č.</th>
+                      {!firstRound && <th className='width-s'>#</th>}
+                      <th className='width-s'>St.č.</th>
                       <th className='text-left'>Jméno</th>
-                      <th>B</th>
-                      <th>SB</th>
-                      <th>BH</th>
+                      <th className='with-m'>B</th>
+                      <th className='with-m'>SB</th>
+                      <th className='with-m'>BH</th>
                     </tr>
                   </thead>
                   <tbody>
                     {
                       tournamentPlayers.map((player, index) => (
                         <tr key={index} className='player-row'>
-                          <td className='text-right'>{index + 1}</td>
-                          <td className='text-right'>{player.id}</td>
+                          {!firstRound && <td className='text-right width-s'>{index + 1}</td>}
+                          <td className='text-right width-s'>{player.startPosition}</td>
                           <td className='name'>{player.name}</td>
-                          <td className='text-center'>0</td>
-                          <td className='text-center'>0</td>
-                          <td className='text-center'>0</td>
+                          <td className='text-center width-m'>{player.score}</td>
+                          <td className='text-center width-m'>{player.bucholz}</td>
+                          <td className='text-center width-m'>{player.sonnenbornBerger}</td>
                         </tr>
                       ))
                     }
@@ -80,13 +84,13 @@ const PlaytimeTournamentWindow = () => {
         }
         <div className="control-panel">
           {
-            selectedTournament?.round === 1 ? <button className='back-to-registration-button dark' onClick={() => changeTournamentPhase('registration')}>
+            firstRound ? <button className='back-to-registration-button dark' onClick={backToRegistration}>
               <FontAwesomeIcon icon={faAnglesLeft} />
               Zpět k registraci
             </button>
             : (
               <>
-                <button className="previous-round-button dark" onClick={backToPreviousRound}>
+                <button className="previous-round-button dark" onClick={previousRound}>
                   <FontAwesomeIcon icon={faAnglesLeft} />
                   Zpět k předchozímu kolu
                 </button>
@@ -97,7 +101,7 @@ const PlaytimeTournamentWindow = () => {
               </>
             )
           }
-          <button className="next-round-button dark">
+          <button className="next-round-button dark" onClick={nextRound}>
             Další kolo
             <FontAwesomeIcon icon={faAnglesRight} />
           </button>

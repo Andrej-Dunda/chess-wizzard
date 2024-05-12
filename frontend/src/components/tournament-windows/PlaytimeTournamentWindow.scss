@@ -79,6 +79,14 @@
               &.text-left {
                 text-align: left;
               }
+
+              &.width-s {
+                max-width: 40px;
+              }
+
+              &.width-m {
+                max-width: 60px;
+              }
             }
           }
 
@@ -88,7 +96,7 @@
               padding: 8px 16px;
 
               &.name {
-                width: 200px;
+                min-width: 200px;
               }
 
               &.text-right {
@@ -98,21 +106,18 @@
               &.text-center {
                 text-align: center;
               }
-            }
 
+              &.width-s {
+                max-width: 40px;
+              }
+
+              &.width-m {
+                max-width: 60px;
+              }
+            }
 
             &:nth-child(even) {
               background-color: var(--grayscale-150);
-
-              &:first-child {
-                border-top-left-radius: 8px;
-                border-bottom-left-radius: 8px;
-              }
-
-              &:last-child {
-                border-top-right-radius: 8px;
-                border-bottom-right-radius: 8px;
-              }
             }
           }
         }
