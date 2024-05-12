@@ -1,12 +1,13 @@
 import { useTournaments } from '../../../../contexts/TournamentsProvider'
+import TournamentControlPanel from '../../../tournament-control-panel/TournamentControlPanel';
 import './MatchesWindow.scss'
 
 const MatchesWindow = () => {
-  const { matches, setResult,selectedMatchIndex, setSelectedMatchIndex } = useTournaments();
+  const { matches, setResult,selectedMatchIndex, setSelectedMatchIndex, selectedTournament } = useTournaments();
 
   return (
     <section className='matches-window'>
-      <h4 className='h4'>Nasazení</h4>
+      <h4 className='h4'>Nasazení {selectedTournament && selectedTournament.round}. kola</h4>
       <div className="results-control-panel">
         <button className="results-control-button dark" onClick={() => setResult(1)}>1  :  0</button>
         <button className="results-control-button dark" onClick={() => setResult(0.5)}>½  :  ½</button>
@@ -50,6 +51,7 @@ const MatchesWindow = () => {
           </tbody>
         </table>
       </div>
+      <TournamentControlPanel />
     </section>
   )
 }

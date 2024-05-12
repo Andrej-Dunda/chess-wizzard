@@ -2,6 +2,7 @@ import EllipsisMenuButton from '../components/buttons/ellipsis-menu-button/Ellip
 import DeleteModalContent from '../components/modal/modal-contents/DeleteModalContent';
 import EditTournamentModalContent from '../components/modal/modal-contents/EditTournamentModalContent';
 import NewTournamentModalContent from '../components/modal/modal-contents/NewTournamentModalContent';
+import Navigation from '../components/navigation/Navigation';
 import { useModal } from '../contexts/ModalProvider';
 import { useNav } from '../contexts/NavigationProvider';
 import { useTournaments } from '../contexts/TournamentsProvider';
@@ -42,39 +43,42 @@ const TournamentsOverview = () => {
   }
 
   return (
-    <div className="tournaments-overview">
-      <h1 className='h1'>Turnaje</h1>
-      <div className="tournaments">
-        {
-          tournaments.map((tournament: iTournament, index: number) => {
-            return (
-              <div key={index} className="tournament-button">
-                <header>
-                  <EllipsisMenuButton menuOptions={[
-                    {
-                      name: 'Smazat',
-                      icon: faTrash,
-                      onClick: () => openDeleteTournamentModal(tournament)
-                    },
-                    {
-                      name: 'Upravit',
-                      icon: faEdit,
-                      onClick: () => openEditTournamentModal(tournament)
-                    }
-                  ]} />
-                </header>
-                <div className="tournament-button-body" onClick={() => openTournament(tournament)} title={tournament.name}>
-                  <h5>
-                    {tournament.name}
-                  </h5>
+    <div className='tournaments-overview'>
+      <Navigation />
+      <div className="tournaments-overview-content">
+        <h1 className='h1'>Turnaje</h1>
+        <div className="tournaments">
+          {
+            tournaments.map((tournament: iTournament, index: number) => {
+              return (
+                <div key={index} className="tournament-button">
+                  <header>
+                    <EllipsisMenuButton menuOptions={[
+                      {
+                        name: 'Smazat',
+                        icon: faTrash,
+                        onClick: () => openDeleteTournamentModal(tournament)
+                      },
+                      {
+                        name: 'Upravit',
+                        icon: faEdit,
+                        onClick: () => openEditTournamentModal(tournament)
+                      }
+                    ]} />
+                  </header>
+                  <div className="tournament-button-body" onClick={() => openTournament(tournament)} title={tournament.name}>
+                    <h5>
+                      {tournament.name}
+                    </h5>
+                  </div>
                 </div>
-              </div>
-            )
-          })
-        }
-        <button type='button' className="add-tournament-button" onClick={openNewTournamentModal}>
-          <FontAwesomeIcon icon={faPlus} className='edit-icon' size="2x" color={grayscale300} />
-        </button>
+              )
+            })
+          }
+          <button type='button' className="add-tournament-button" onClick={openNewTournamentModal}>
+            <FontAwesomeIcon icon={faPlus} className='edit-icon' size="2x" color={grayscale300} />
+          </button>
+        </div>
       </div>
     </div>
   )

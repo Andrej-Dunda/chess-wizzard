@@ -5,18 +5,30 @@
   .tournament-window-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 
-    border-bottom: 1px solid var(--grayscale-150);
+    background-color: var(--grayscale-900);
+    color: var(--grayscale-100);
 
     .tournament-title {
       width: 150px;
       padding: 16px;
     }
 
-    .tournament-round {
-      width: 150px;
-      padding: 16px;
+    .home-button {
+      width: 32px;
+      height: 32px;
+      box-sizing: border-box;
+      margin-left: 96px;
+      margin-right: 8px;
       text-align: right;
+      cursor: pointer;
+
+      font-size: 22px;
+
+      &:hover {
+        color: var(--grayscale-200);
+      }
     }
 
     .results-toggle {
@@ -34,7 +46,7 @@
 
         &.active {
           font-weight: 900;
-          border-bottom: 2px solid var(--grayscale-900);
+          border-bottom: 2px solid var(--grayscale-100);
         }
       }
     }
@@ -42,28 +54,11 @@
 
   .tournament-window-body {
     height: calc(100vh - 112px);
+    max-height: calc(100vh - 112px);
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 32px;
     gap: 24px;
-
-    .control-panel {
-      width: 600px;
-      display: flex;
-      gap: 16px;
-      justify-content: space-between;
-
-      button {
-        flex-grow: 1;
-        padding: 8px 16px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 8px;
-
-        font-weight: 500;
-      }
-    }
   }
 }

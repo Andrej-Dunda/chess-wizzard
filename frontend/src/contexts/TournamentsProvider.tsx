@@ -28,6 +28,7 @@ type TournamentsContextType = {
   selectedMatchIndex: number | undefined;
   setSelectedMatchIndex: React.Dispatch<React.SetStateAction<number | undefined>>;
   setResult: (result: number) => void;
+  isAnyResultNull: boolean;
 };
 
 export const TournamentsContext = createContext<TournamentsContextType | null>(null);
@@ -150,18 +151,9 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   const [selectedTournament, setSelectedTournament] = useState<iTournament>()
   const [tournamentPlayers, setTournamentPlayers] = useState<iTournamentPlayer[]>([])
   const { openSnackbar } = useSnackbar();
-  const [matches, setMatches] = useState<iMatch[]>(tournamentPlayers.map((player, index) => {
-    const whitePlayer = player
-    const blackPlayer = tournamentPlayers[tournamentPlayers.length - index - 1]
-    const match: iMatch = {
-      whitePlayer,
-      blackPlayer,
-      result: null,
-      boardNumber: index + 1
-    }
-    return match
-  }))
+  const [matches, setMatches] = useState<iMatch[]>([])
   const [selectedMatchIndex, setSelectedMatchIndex] = useState<number>();
+  const isAnyResultNull = matches.some(match => match.result === null);
 
   useEffect(() => {
     getTournaments();
@@ -178,6 +170,20 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
       localStorage.setItem('selectedTournamentId', selectedTournament.id.toString());
     }
   }, [selectedTournament]);
+
+  useEffect(() => {
+    setMatches(tournamentPlayers.map((player, index) => {
+      const whitePlayer = player
+      const blackPlayer = tournamentPlayers[tournamentPlayers.length - index - 1]
+      const match: iMatch = {
+        whitePlayer,
+        blackPlayer,
+        result: null,
+        boardNumber: index + 1
+      }
+      return match
+    }))
+  }, [tournamentPlayers])
 
   const getTournaments = async () => {
     const tournamentsData = await window.api.getTournaments();
@@ -274,7 +280,8 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     setMatches,
     selectedMatchIndex,
     setSelectedMatchIndex,
-    setResult
+    setResult,
+    isAnyResultNull
   };
 
   return (

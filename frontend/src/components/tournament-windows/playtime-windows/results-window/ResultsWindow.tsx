@@ -1,4 +1,5 @@
 import { useTournaments } from '../../../../contexts/TournamentsProvider';
+import TournamentControlPanel from '../../../tournament-control-panel/TournamentControlPanel';
 import './ResultsWindow.scss'
 import React from 'react'
 
@@ -14,7 +15,7 @@ const ResultsWindow = () => {
           <thead>
             <tr className='heading-row'>
               {!firstRound && <th className='width-s text-right' title='Pořadí'>#</th>}
-              <th className='width-s text-right' title='Startovní číslo'>St.č.</th>
+              <th className='width-s text-center' title='Startovní číslo'>St.č.</th>
               <th className='text-left'>Jméno</th>
               <th className='with-m text-center' title='Body'>B</th>
               <th className='with-m text-center' title='Sonnenborn-Berger'>SB</th>
@@ -26,7 +27,7 @@ const ResultsWindow = () => {
               tournamentPlayers.map((player, index) => (
                 <tr key={index} className='player-row'>
                   {!firstRound && <td className='text-right width-s'>{index + 1}</td>}
-                  <td className='text-right width-s'>{player.startPosition}</td>
+                  <td className='text-center width-s'>{player.startPosition}</td>
                   <td className='name text-left'>{player.name}</td>
                   <td className='text-center width-m'>{player.score}</td>
                   <td className='text-center width-m'>{player.bucholz}</td>
@@ -37,6 +38,7 @@ const ResultsWindow = () => {
           </tbody>
         </table>
       </div>
+      <TournamentControlPanel />
     </section>
   )
 }

@@ -1,0 +1,25 @@
+.tournament-control-panel {
+  width: 100%;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+
+  button {
+    flex-grow: 1;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+
+    font-weight: 500;
+
+    &.disabled {
+      opacity: 0.5;
+
+      &:hover {
+        background-color: var(--grayscale-900);
+      }
+    }
+  }
+}
