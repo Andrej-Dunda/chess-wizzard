@@ -21,4 +21,5 @@ export interface iMatch {
   blackPlayer: iTournamentPlayer;
   result: number | null;
   boardNumber: number;
+  round: number;
 }

@@ -216,9 +216,14 @@ ipcMain.handle('get-players', async (event, args) => {
   });
 });
 
+// random integer generator
+const randInt = (max) => {
+  return Math.floor(Math.random() * max) / 2;
+}
+
 // Add player
 ipcMain.on('add-player', (event, args) => {
-  db.run(`INSERT INTO ${args.playersTableName} (name, score, bucholz, sonnenbornBerger) VALUES (?, ?, ?, ?)`, [args.name, 0, 0, 0], (err) => {
+  db.run(`INSERT INTO ${args.playersTableName} (name, score, bucholz, sonnenbornBerger) VALUES (?, ?, ?, ?)`, [args.name, randInt(10), randInt(40), randInt(30)], (err) => {
     if (err) {
       console.log(err);
     } else {

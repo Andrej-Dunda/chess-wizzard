@@ -5,6 +5,16 @@ import './MatchesWindow.scss'
 const MatchesWindow = () => {
   const { matches, setResult,selectedMatchIndex, setSelectedMatchIndex, selectedTournament } = useTournaments();
 
+  const formatNumber = (num: number) => {
+    const integerPart = Math.floor(num);
+    const decimalPart = num - integerPart;
+    if (decimalPart === 0.5) {
+      return `${integerPart}½`;
+    } else {
+      return num;
+    }
+  }
+
   return (
     <section className='matches-window'>
       <h4 className='h4'>Nasazení {selectedTournament && selectedTournament.round}. kola</h4>
@@ -34,7 +44,7 @@ const MatchesWindow = () => {
                   <td className="board-number width-s text-center">{match.boardNumber}</td>
                   <td className="start-position width-s text-center">{match.whitePlayer.startPosition}</td>
                   <td className="name text-left">{match.whitePlayer.name}</td>
-                  <td className="score text-center">{match.whitePlayer.score}</td>
+                  <td className="score text-center">{formatNumber(match.whitePlayer.score)}</td>
                   <td className="result text-center">
                     {
                       match.result !== null ?
@@ -42,7 +52,7 @@ const MatchesWindow = () => {
                       : ':'
                     }
                    </td>
-                  <td className="score text-center">{match.blackPlayer.score}</td>
+                  <td className="score text-center">{formatNumber(match.blackPlayer.score)}</td>
                   <td className="name text-left">{match.blackPlayer.name}</td>
                   <td className="start-position width-s text-center">{match.blackPlayer.startPosition}</td>
                 </tr>

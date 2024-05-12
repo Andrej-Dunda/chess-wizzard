@@ -7,6 +7,16 @@ const ResultsWindow = () => {
   const { selectedTournament, tournamentPlayers } = useTournaments();
   const firstRound: boolean = selectedTournament?.round === 1;
 
+  const formatNumber = (num: number) => {
+    const integerPart = Math.floor(num);
+    const decimalPart = num - integerPart;
+    if (decimalPart === 0.5) {
+      return `${integerPart}½`;
+    } else {
+      return num;
+    }
+  }
+
   return (
     <section className='results-window'>
       <h4 className="h4">{firstRound ? 'Startovní listina' : `Výsledky po ${selectedTournament && selectedTournament.round - 1}. kole`}</h4>
@@ -29,9 +39,9 @@ const ResultsWindow = () => {
                   {!firstRound && <td className='text-right width-s'>{index + 1}</td>}
                   <td className='text-center width-s'>{player.startPosition}</td>
                   <td className='name text-left'>{player.name}</td>
-                  <td className='text-center width-m'>{player.score}</td>
-                  <td className='text-center width-m'>{player.bucholz}</td>
-                  <td className='text-center width-m'>{player.sonnenbornBerger}</td>
+                  <td className='text-center width-m'>{formatNumber(player.score)}</td>
+                  <td className='text-center width-m'>{formatNumber(player.bucholz)}</td>
+                  <td className='text-center width-m'>{formatNumber(player.sonnenbornBerger)}</td>
                 </tr>
               ))
             }

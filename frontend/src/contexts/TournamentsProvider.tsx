@@ -179,11 +179,14 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
         whitePlayer,
         blackPlayer,
         result: null,
-        boardNumber: index + 1
+        boardNumber: index + 1,
+        round: selectedTournament?.round || 1
       }
       return match
     }))
-  }, [tournamentPlayers])
+    console.log(groupPlayersByScore())
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tournamentPlayers, selectedTournament])
 
   const getTournaments = async () => {
     const tournamentsData = await window.api.getTournaments();
@@ -220,14 +223,14 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   const changeTournamentPhase = async (phase: string) => {
     if (selectedTournament) {
       await window.api.changeTournamentPhase({ id: selectedTournament.id, phase: phase })
-      getTournament(selectedTournament.id)
+      await getTournament(selectedTournament.id)
     }
   }
 
   const changeTournamentRound = async (round: number) => {
     if (selectedTournament) {
       await window.api.changeTournamentRound({ id: selectedTournament.id, round: round })
-      getTournament(selectedTournament.id)
+      await getTournament(selectedTournament.id)
     }
   }
 
@@ -257,6 +260,17 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     // if nextMatchIndex is -1, find first match with null result
     setSelectedMatchIndex(nextMatchIndex === -1 ? matches.findIndex(match => match.result === null) : nextMatchIndex)
     // selectedMatchIndex < matches.length - 1 && setSelectedMatchIndex(selectedMatchIndex + 1)
+  }
+
+  const groupPlayersByScore = () => {
+    return tournamentPlayers.reduce((groupedPlayers, player) => {
+      const key = player.score;
+      if (!groupedPlayers[key]) {
+        groupedPlayers[key] = [];
+      }
+      groupedPlayers[key].push(player);
+      return groupedPlayers;
+    }, {} as { [key: number]: iTournamentPlayer[] });
   }
 
   const contextValue: TournamentsContextType = {

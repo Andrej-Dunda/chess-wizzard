@@ -29,7 +29,7 @@ const RegistrationTournamentWindow = () => {
 
   const startTournament = async () => {
     await changeTournamentRound(1)
-    changeTournamentPhase('playtime')
+    await changeTournamentPhase('playtime')
   }
 
   return (
