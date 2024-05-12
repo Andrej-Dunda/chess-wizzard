@@ -6,6 +6,7 @@ const MatchesWindow = () => {
   const { matches, setResult,selectedMatchIndex, setSelectedMatchIndex, selectedTournament } = useTournaments();
 
   const formatNumber = (num: number) => {
+    if (num === 0.5) return '½';
     const integerPart = Math.floor(num);
     const decimalPart = num - integerPart;
     if (decimalPart === 0.5) {

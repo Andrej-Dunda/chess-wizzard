@@ -85,12 +85,18 @@ const generatePlayersTableName = (tournamentName) => {
   return 'players_' + tournamentName.replace(/\s/g, '_') + '_' + Math.random().toString(36).substring(7);
 }
 
+// games table name generator based on tournament name without spaces and a random string
+const generateMatchesTableName = (tournamentName) => {
+  return 'matches_' + tournamentName.replace(/\s/g, '_') + '_' + Math.random().toString(36).substring(7);
+}
+
 // IPC communication
 
 // Create tournament
 ipcMain.on('create-tournament', (event, args) => {
   const playersTableName = generatePlayersTableName(args.name);
-  db.run('INSERT INTO tournaments (name, date, playersTableName, phase, round) VALUES (?, ?, ?, ?, ?)', [args.name, args.date, playersTableName, 'registration', 0], (err) => {
+  const matchesTableName = generateMatchesTableName(args.name);
+  db.run('INSERT INTO tournaments (name, date, phase, round, playersTableName, matchesTableName) VALUES (?, ?, ?, ?, ?, ?)', [args.name, args.date, 'registration', 0, playersTableName, matchesTableName], (err) => {
     if (err) {
       console.log(err);
     } else {
@@ -103,6 +109,14 @@ ipcMain.on('create-tournament', (event, args) => {
       console.log(err);
     } else {
       console.log('Players table created');
+    }
+  });
+  // Create matches table
+  db.run(`CREATE TABLE ${matchesTableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, whitePlayer TEXT, blackPlayer TEXT, result TEXT, boardNumber INTEGER, round INTEGER)`, (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Games table created');
     }
   });
 });
@@ -132,6 +146,14 @@ ipcMain.on('delete-tournament', (event, args) => {
       console.log(err);
     } else {
       console.log('Players table deleted');
+    }
+  });
+  // delete matches table
+  db.run(`DROP TABLE ${args.matchesTableName}`, (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Matches table deleted');
     }
   });
 });
@@ -201,6 +223,19 @@ ipcMain.on('change-tournament-round', (event, args) => {
       }
     })
   }
+  // delete all matches from rounds > args.round
+  db.get('SELECT matchesTableName FROM tournaments WHERE id = ?', [args.id], (err, row) => {
+    if (err) {
+      console.log(err);
+    } else {
+      const matchesTableName = row.matchesTableName;
+      db.run('DELETE FROM ' + matchesTableName + ' WHERE round > ?', [args.round], (err) => {
+        if (err) {
+          console.log(err);
+        }
+      });
+    }
+  });
 })
 
 // Get players
@@ -239,6 +274,41 @@ ipcMain.on('remove-player', (event, args) => {
       console.log(err);
     } else {
       console.log('Player removed');
+    }
+  });
+});
+
+// Save matchmaking
+ipcMain.on('save-matches', (event, args) => {
+  db.run(`INSERT INTO ${args.matchesTableName} (whitePlayer, blackPlayer, boardNumber, round) VALUES (?, ?, ?, ?)`, [args.whitePlayer, args.blackPlayer, args.boardNumber, args.round], (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Match saved');
+    }
+  });
+});
+
+// Get matches
+ipcMain.handle('get-matches', async (event, args) => {
+  return new Promise((resolve, reject) => {
+    db.all(`SELECT * FROM ${args.matchesTableName} WHERE round = ?`, [args.round], (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+});
+
+// Save results
+ipcMain.on('save-results', (event, args) => {
+  db.run(`UPDATE ${args.matchesTableName} SET result = ? WHERE id = ?`, [args.result, args.id], (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log('Result saved');
     }
   });
 });

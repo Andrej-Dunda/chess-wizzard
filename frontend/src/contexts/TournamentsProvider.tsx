@@ -3,6 +3,14 @@ import React from 'react';
 import { iMatch, iTournament, iTournamentPlayer } from '../interfaces/tournaments-interface';
 import { useSnackbar } from './SnackbarProvider';
 
+type iMatchTemplate = {
+  whitePlayer: iTournamentPlayer;
+  blackPlayer: iTournamentPlayer;
+  result: number | null;
+  boardNumber: number;
+  round: number;
+}
+
 type TournamentsContextType = {
   tournaments: iTournament[];
   setTournaments: React.Dispatch<React.SetStateAction<iTournament[]>>;
@@ -172,21 +180,9 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   }, [selectedTournament]);
 
   useEffect(() => {
-    setMatches(tournamentPlayers.map((player, index) => {
-      const whitePlayer = player
-      const blackPlayer = tournamentPlayers[tournamentPlayers.length - index - 1]
-      const match: iMatch = {
-        whitePlayer,
-        blackPlayer,
-        result: null,
-        boardNumber: index + 1,
-        round: selectedTournament?.round || 1
-      }
-      return match
-    }))
-    console.log(groupPlayersByScore())
+    // matchPlayers();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tournamentPlayers, selectedTournament])
+  }, [tournamentPlayers])
 
   const getTournaments = async () => {
     const tournamentsData = await window.api.getTournaments();
@@ -235,7 +231,19 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   }
 
   const getTournamentPlayers = async (playersTableName: string) => {
-    setTournamentPlayers(await window.api.getPlayers({ playersTableName: playersTableName }))
+    const players: iTournamentPlayer[] = await window.api.getPlayers({ playersTableName: playersTableName });
+    const sortedPlayers = players.sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      } else if (b.sonnenbornBerger !== a.sonnenbornBerger) {
+        return b.sonnenbornBerger - a.sonnenbornBerger;
+      } else if (b.bucholz !== a.bucholz) {
+        return b.bucholz - a.bucholz;
+      } else {
+        return a.startPosition - b.startPosition;
+      }
+    });
+    setTournamentPlayers(sortedPlayers);
   }
 
   const addTournamentPlayer = async (playersTableName: string, newPlayerName: string) => {
@@ -262,15 +270,45 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     // selectedMatchIndex < matches.length - 1 && setSelectedMatchIndex(selectedMatchIndex + 1)
   }
 
-  const groupPlayersByScore = () => {
-    return tournamentPlayers.reduce((groupedPlayers, player) => {
-      const key = player.score;
-      if (!groupedPlayers[key]) {
-        groupedPlayers[key] = [];
-      }
-      groupedPlayers[key].push(player);
-      return groupedPlayers;
-    }, {} as { [key: number]: iTournamentPlayer[] });
+  const matchPlayers = async () => {
+    let sortedPlayers = [...tournamentPlayers];
+    let newMatches: iMatchTemplate[] = [];
+
+    while (sortedPlayers.length > 1) {
+        for (let i = 0; i < sortedPlayers.length; i++) {
+            let player1 = sortedPlayers[i];
+
+            // Find a player with a similar score who hasn't played with player1 yet
+            let player2Index = sortedPlayers.findIndex((player2, j) => {
+                return j !== i &&
+                    Math.abs(player1.score - player2.score) <= 1 &&
+                    !player1.opponentsIds.includes(player2.id);
+            });
+
+            if (player2Index !== -1 && selectedTournament) {
+                let player2 = sortedPlayers[player2Index];
+
+                // Remove the players from the sorted array
+                sortedPlayers = sortedPlayers.filter((_, index) => index !== i && index !== player2Index);
+
+                // Add the pair to the pairs array
+                newMatches.push({
+                    whitePlayer: player1.gamesAsWhite <= player1.gamesAsBlack ? player1 : player2,
+                    blackPlayer: player1.gamesAsWhite > player1.gamesAsBlack ? player1 : player2,
+                    result: null,
+                    boardNumber: newMatches.length + 1,
+                    round: selectedTournament.round
+                });
+
+                break;
+            }
+        }
+    }
+
+    if (selectedTournament) {
+      await newMatches.map((match) => window.api.saveMatches({ whitePlayer: match.whitePlayer, blackPlayer: match.blackPlayer, boardNumber: match.boardNumber, round: match.round, matchesTableName: selectedTournament.matchesTableName }));
+      setMatches(await window.api.getMatches({ matchesTableName: selectedTournament.matchesTableName, round: selectedTournament.round }));
+    }
   }
 
   const contextValue: TournamentsContextType = {

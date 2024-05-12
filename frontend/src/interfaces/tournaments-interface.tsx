@@ -5,6 +5,7 @@ export interface iTournament {
   phase: string;
   round: number;
   playersTableName: string;
+  matchesTableName: string;
 }
 
 export interface iTournamentPlayer {
@@ -14,9 +15,13 @@ export interface iTournamentPlayer {
   score: number;
   bucholz: number;
   sonnenbornBerger: number;
+  opponentsIds: number[];
+  gamesAsWhite: number;
+  gamesAsBlack: number;
 }
 
 export interface iMatch {
+  id: number;
   whitePlayer: iTournamentPlayer;
   blackPlayer: iTournamentPlayer;
   result: number | null;
