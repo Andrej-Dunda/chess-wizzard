@@ -248,7 +248,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   }
 
   const setResult = (result: number) => {
-    if (selectedMatchIndex === undefined) return
+    if (selectedMatchIndex === undefined || selectedMatchIndex === -1) return
     const newMatches = [...matches]
     newMatches[selectedMatchIndex].result = result
     setMatches(newMatches)

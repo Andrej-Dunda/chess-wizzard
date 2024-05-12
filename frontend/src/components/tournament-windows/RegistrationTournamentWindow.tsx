@@ -1,7 +1,7 @@
 import './RegistrationTournamentWindow.scss'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useRef, useState } from 'react'
-import { faHome, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faPlus, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { useTournaments } from '../../contexts/TournamentsProvider';
 import { iTournamentPlayer } from '../../interfaces/tournaments-interface';
 import { useNav } from '../../contexts/NavigationProvider';
@@ -13,16 +13,14 @@ const RegistrationTournamentWindow = () => {
   const grayscale900 = getComputedStyle(document.documentElement).getPropertyValue('--grayscale-900').trim();
   const { toHome } = useNav();
 
-  const onNewPlayerInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      if (!newPlayerName.trim()) {
-        return
-      }
+  const onNewPlayerInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && submitNewPlayer()
 
-      selectedTournament && addTournamentPlayer(selectedTournament.playersTableName, newPlayerName)
-      setNewPlayerName('')
-      newPlayerInputRef.current?.focus()
-    }
+  const submitNewPlayer = () => {
+    if (!newPlayerName.trim()) return newPlayerInputRef.current?.focus()
+
+    selectedTournament && addTournamentPlayer(selectedTournament.playersTableName, newPlayerName)
+    setNewPlayerName('')
+    newPlayerInputRef.current?.focus()
   }
 
   const removePlayer = (playerId: number) => {
@@ -44,15 +42,20 @@ const RegistrationTournamentWindow = () => {
       <div className="tournament-window-body">
         <section className="players-section">
           <h4>Hráči</h4>
-          <input
-            type="text"
-            className='new-player-input'
-            value={newPlayerName}
-            onChange={(e) => setNewPlayerName(e.target.value)}
-            placeholder="Zadejte jméno hráče a stiskněte Enter pro přidání..."
-            ref={newPlayerInputRef}
-            onKeyDown={onNewPlayerInputKeyDown}
-          />
+          <div className="new-player-input-wrapper">
+            <input
+              type="text"
+              className='new-player-input'
+              value={newPlayerName}
+              onChange={(e) => setNewPlayerName(e.target.value)}
+              placeholder="Zadejte jméno hráče a stiskněte Enter pro přidání..."
+              ref={newPlayerInputRef}
+              onKeyDown={onNewPlayerInputKeyDown}
+            />
+            <span className="icon-wrapper" onClick={submitNewPlayer}>
+              <FontAwesomeIcon icon={faPlus} color={grayscale900} className='add-icon' />
+            </span>
+          </div>
           {tournamentPlayers.length ? (
             <>
               <div className="players">
