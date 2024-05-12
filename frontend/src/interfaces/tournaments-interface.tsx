@@ -15,3 +15,10 @@ export interface iTournamentPlayer {
   bucholz: number;
   sonnenbornBerger: number;
 }
+
+export interface iMatch {
+  whitePlayer: iTournamentPlayer;
+  blackPlayer: iTournamentPlayer;
+  result: number | null;
+  boardNumber: number;
+}

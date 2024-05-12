@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import React from 'react';
-import { iTournament, iTournamentPlayer } from '../interfaces/tournaments-interface';
+import { iMatch, iTournament, iTournamentPlayer } from '../interfaces/tournaments-interface';
 import { useSnackbar } from './SnackbarProvider';
 
 type TournamentsContextType = {
@@ -22,6 +22,12 @@ type TournamentsContextType = {
   getTournamentPlayers: (playersTableName: string) => void;
   addTournamentPlayer: (playersTableName: string, newPlayerName: string) => void;
   removeTournamentPlayer: (playersTableName: string, playerId: number) => void;
+
+  matches: iMatch[];
+  setMatches: React.Dispatch<React.SetStateAction<iMatch[]>>;
+  selectedMatchIndex: number | undefined;
+  setSelectedMatchIndex: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setResult: (result: number) => void;
 };
 
 export const TournamentsContext = createContext<TournamentsContextType | null>(null);
@@ -144,6 +150,18 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   const [selectedTournament, setSelectedTournament] = useState<iTournament>()
   const [tournamentPlayers, setTournamentPlayers] = useState<iTournamentPlayer[]>([])
   const { openSnackbar } = useSnackbar();
+  const [matches, setMatches] = useState<iMatch[]>(tournamentPlayers.map((player, index) => {
+    const whitePlayer = player
+    const blackPlayer = tournamentPlayers[tournamentPlayers.length - index - 1]
+    const match: iMatch = {
+      whitePlayer,
+      blackPlayer,
+      result: null,
+      boardNumber: index + 1
+    }
+    return match
+  }))
+  const [selectedMatchIndex, setSelectedMatchIndex] = useState<number>();
 
   useEffect(() => {
     getTournaments();
@@ -223,6 +241,15 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     openSnackbar('Hráč odebrán!')
   }
 
+  const setResult = (result: number) => {
+    if (selectedMatchIndex === undefined) return
+    const newMatches = [...matches]
+    newMatches[selectedMatchIndex].result = result
+    setMatches(newMatches)
+    selectedMatchIndex < matches.length - 1 && setSelectedMatchIndex(selectedMatchIndex + 1)
+    console.log(result)
+  }
+
   const contextValue: TournamentsContextType = {
     tournaments: tournaments,
     setTournaments: setTournaments,
@@ -241,7 +268,13 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     tournamentPlayers,
     setTournamentPlayers,
     addTournamentPlayer,
-    removeTournamentPlayer
+    removeTournamentPlayer,
+
+    matches,
+    setMatches,
+    selectedMatchIndex,
+    setSelectedMatchIndex,
+    setResult
   };
 
   return (

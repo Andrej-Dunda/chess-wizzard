@@ -13,12 +13,12 @@ const ResultsWindow = () => {
         <table className='results-table'>
           <thead>
             <tr className='heading-row'>
-              {!firstRound && <th className='width-s'>#</th>}
-              <th className='width-s'>St.č.</th>
+              {!firstRound && <th className='width-s text-right' title='Pořadí'>#</th>}
+              <th className='width-s text-right' title='Startovní číslo'>St.č.</th>
               <th className='text-left'>Jméno</th>
-              <th className='with-m'>B</th>
-              <th className='with-m'>SB</th>
-              <th className='with-m'>BH</th>
+              <th className='with-m text-center' title='Body'>B</th>
+              <th className='with-m text-center' title='Sonnenborn-Berger'>SB</th>
+              <th className='with-m text-center' title='Bucholz'>BH</th>
             </tr>
           </thead>
           <tbody>
@@ -27,7 +27,7 @@ const ResultsWindow = () => {
                 <tr key={index} className='player-row'>
                   {!firstRound && <td className='text-right width-s'>{index + 1}</td>}
                   <td className='text-right width-s'>{player.startPosition}</td>
-                  <td className='name'>{player.name}</td>
+                  <td className='name text-left'>{player.name}</td>
                   <td className='text-center width-m'>{player.score}</td>
                   <td className='text-center width-m'>{player.bucholz}</td>
                   <td className='text-center width-m'>{player.sonnenbornBerger}</td>
