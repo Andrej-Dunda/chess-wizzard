@@ -3,7 +3,7 @@ import TournamentControlPanel from '../../../tournament-control-panel/Tournament
 import './MatchesWindow.scss'
 
 const MatchesWindow = () => {
-  const { matches, setResult,selectedMatchIndex, setSelectedMatchIndex, selectedTournament } = useTournaments();
+  const { matches, setResult, selectedMatchIndex, setSelectedMatchIndex, selectedTournament } = useTournaments();
 
   const formatNumber = (num: number) => {
     if (num === 0.5) return '½';

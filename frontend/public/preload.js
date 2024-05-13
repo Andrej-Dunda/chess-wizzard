@@ -13,9 +13,10 @@ contextBridge.exposeInMainWorld('api', {
   addPlayer: (args) => ipcRenderer.send('add-player', args),
   removePlayer: (args) => ipcRenderer.send('remove-player', args),
   changeTournamentPhase: (args) => ipcRenderer.send('change-tournament-phase', args),
-  changeTournamentRound: (args) => ipcRenderer.send('change-tournament-round', args),
   saveMatches: (args) => ipcRenderer.send('save-matches', args),
-  saveResults: (args) => ipcRenderer.send('save-results', args),
+  saveResult: (args) => ipcRenderer.send('save-result', args),
+  nextTournamentRound: (args) => ipcRenderer.send('next-tournament-round', args),
+  previousTournamentRound: (args) => ipcRenderer.send('previous-tournament-round', args),
   // Receive Methods
   // testReceive: (callback) => ipcRenderer.on('test-receive', (event, data) => { callback(data); })
 });

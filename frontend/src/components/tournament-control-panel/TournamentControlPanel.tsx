@@ -9,11 +9,9 @@ const TournamentControlPanel = () => {
   const firstRound: boolean = selectedTournament?.round === 1;
   
   const backToRegistration = async () => {
-    await changeTournamentRound(0)
+    await changeTournamentRound('previous')
     changeTournamentPhase('registration')
   }
-  const previousRound = () => selectedTournament && changeTournamentRound(selectedTournament.round - 1)
-  const nextRound = () => selectedTournament && changeTournamentRound(selectedTournament.round + 1)
 
   return (
     <div className="tournament-control-panel">
@@ -24,7 +22,7 @@ const TournamentControlPanel = () => {
         </button>
         : (
           <>
-            <button className="previous-round-button dark" onClick={previousRound}>
+            <button className="previous-round-button dark" onClick={() => changeTournamentRound('previous')}>
               <FontAwesomeIcon icon={faAnglesLeft} />
               Zpět k předchozímu kolu
             </button>
@@ -35,7 +33,7 @@ const TournamentControlPanel = () => {
           </>
         )
       }
-      <button className={`next-round-button dark${isAnyResultNull ? ' disabled' : ''}`} title={isAnyResultNull ? 'Vyplňte všechny výsledky!' : ''} onClick={nextRound}>
+      <button className={`next-round-button dark${isAnyResultNull ? ' disabled' : ''}`} title={isAnyResultNull ? 'Vyplňte všechny výsledky!' : ''} onClick={() => changeTournamentRound('next')}>
         Další kolo
         <FontAwesomeIcon icon={faAnglesRight} />
       </button>

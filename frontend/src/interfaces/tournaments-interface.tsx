@@ -15,7 +15,7 @@ export interface iTournamentPlayer {
   score: number;
   bucholz: number;
   sonnenbornBerger: number;
-  opponentsIds: number[];
+  opponentsIds: string;
   gamesAsWhite: number;
   gamesAsBlack: number;
 }
