@@ -18,7 +18,7 @@ const MatchesWindow = () => {
 
   return (
     <section className='matches-window'>
-      <h4 className='h4'>Nasazení {selectedTournament && selectedTournament.round}. kola</h4>
+      <h4 className='h4'>Nasazení {selectedTournament && selectedTournament.currentRound}. kola</h4>
       <div className="results-control-panel">
         <button className="results-control-button dark" onClick={() => setResult(1)}>1  :  0</button>
         <button className="results-control-button dark" onClick={() => setResult(0.5)}>½  :  ½</button>

@@ -10,7 +10,7 @@ import { faHome } from '@fortawesome/free-solid-svg-icons';
 const PlaytimeTournamentWindow = () => {
   const { selectedTournament, getMatches } = useTournaments();
   const [showResults, setShowResults] = React.useState<boolean>(true);
-  const firstRound: boolean = selectedTournament?.round === 1;
+  const firstRound: boolean = selectedTournament?.currentRound === 1;
   const { toHome } = useNav();
 
   useEffect(() => {

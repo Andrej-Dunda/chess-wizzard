@@ -5,7 +5,7 @@ import React from 'react'
 
 const ResultsWindow = () => {
   const { selectedTournament, tournamentPlayers } = useTournaments();
-  const firstRound: boolean = selectedTournament?.round === 1;
+  const firstRound: boolean = selectedTournament?.currentRound === 1;
 
   const formatNumber = (num: number) => {
     if (num === 0.5) return '½';
@@ -20,7 +20,7 @@ const ResultsWindow = () => {
 
   return (
     <section className='results-window'>
-      <h4 className="h4">{firstRound ? 'Startovní listina' : `Výsledky po ${selectedTournament && selectedTournament.round - 1}. kole`}</h4>
+      <h4 className="h4">{firstRound ? 'Startovní listina' : `Výsledky po ${selectedTournament && selectedTournament.currentRound - 1}. kole`}</h4>
       <div className="table-wrapper">
         <table className='results-table'>
           <thead>
@@ -41,8 +41,8 @@ const ResultsWindow = () => {
                   <td className='text-center width-s'>{player.startPosition}</td>
                   <td className='name text-left'>{player.name}</td>
                   <td className='text-center width-m'>{formatNumber(player.score)}</td>
-                  <td className='text-center width-m'>{formatNumber(player.bucholz)}</td>
                   <td className='text-center width-m'>{formatNumber(player.sonnenbornBerger)}</td>
+                  <td className='text-center width-m'>{formatNumber(player.bucholz)}</td>
                 </tr>
               ))
             }

@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 const NewTournamentModalContent = () => {
   const [newTournamentName, setNewTournamentName] = useState<string>('')
+  const [newTournamentRoundsCount, setNewTournamentRoundsCount] = useState<number>(7)
   const { postTournament } = useTournaments();
   const { closeModal } = useModal();
   const submitButtonRef = useRef<HTMLButtonElement>(null);
@@ -20,14 +21,28 @@ const NewTournamentModalContent = () => {
   }, [])
 
   const submitNewTournament = () => {
-    postTournament(newTournamentName)
+    postTournament(newTournamentName, newTournamentRoundsCount)
     setNewTournamentName('')
+    setNewTournamentRoundsCount(1)
     closeModal()
   }
 
   return (
     <div className='new-tournament-modal-content'>
-      <h2 className='h2'>Nový turnaj</h2>
+      <div className="header">
+        <h2 className='h2'>Nový turnaj</h2>
+        <label className='rounds-count-label' htmlFor="new-tournament-rounds-count-input">
+          <span>Počet kol:</span>
+          <input
+            type="number"
+            id='new-tournament-rounds-count-input'
+            value={newTournamentRoundsCount}
+            onChange={(e) => setNewTournamentRoundsCount(parseInt(e.target.value))}
+            min={1}
+            max={15}
+          />
+        </label>
+      </div>
       <input
         type="text"
         id='new-tournament-name-input'

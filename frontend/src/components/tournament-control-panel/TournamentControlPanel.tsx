@@ -6,7 +6,7 @@ import { useTournaments } from '../../contexts/TournamentsProvider'
 
 const TournamentControlPanel = () => {
   const { changeTournamentPhase, selectedTournament, changeTournamentRound, isAnyResultNull } = useTournaments();
-  const firstRound: boolean = selectedTournament?.round === 1;
+  const firstRound: boolean = selectedTournament?.currentRound === 1;
   
   const backToRegistration = async () => {
     await changeTournamentRound('previous')

@@ -22,13 +22,13 @@ const RegistrationTournamentWindow = () => {
   const submitNewPlayer = () => {
     if (!newPlayerName.trim()) return newPlayerInputRef.current?.focus()
 
-    selectedTournament && addTournamentPlayer(selectedTournament.playersTableName, newPlayerName)
+    selectedTournament && addTournamentPlayer(newPlayerName)
     setNewPlayerName('')
     newPlayerInputRef.current?.focus()
   }
 
   const removePlayer = (playerId: number) => {
-    selectedTournament && removeTournamentPlayer(selectedTournament.playersTableName, playerId)
+    selectedTournament && removeTournamentPlayer(playerId)
   }
 
   const startTournament = async () => {

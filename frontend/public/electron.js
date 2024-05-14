@@ -80,81 +80,95 @@ if (isDev) {
   });
 }
 
-// players table name generator based on tournament name without spaces and a random string
-const generatePlayersTableName = (tournamentName) => {
-  return 'players_' + tournamentName.replace(/\s/g, '_') + '_' + Math.random().toString(36).substring(7);
-}
-
-// games table name generator based on tournament name without spaces and a random string
-const generateMatchesTableName = (tournamentName) => {
-  return 'matches_' + tournamentName.replace(/\s/g, '_') + '_' + Math.random().toString(36).substring(7);
-}
-
 // Save matches
 const saveMatch = async (args) => {
   try {
-    await runQuery(`INSERT INTO ${args.matchesTableName} (whitePlayer, blackPlayer, boardNumber, round) VALUES (?, ?, ?, ?)`, [JSON.stringify(args.whitePlayer), JSON.stringify(args.blackPlayer), args.boardNumber, args.round]);
-
-    const whitePlayerRow = await getQuery(`SELECT * FROM ${args.playersTableName} WHERE id = ?`, [args.whitePlayer.id]);
-    const whitePlayerOpponentsIds = JSON.parse(whitePlayerRow.opponentsIds);
-    whitePlayerOpponentsIds.push(args.blackPlayer.id);
-    await runQuery(`UPDATE ${args.playersTableName} SET opponentsIds = ?, gamesAsWhite = gamesAsWhite + 1 WHERE id = ?`, [JSON.stringify(whitePlayerOpponentsIds), args.whitePlayer.id]);
-
-    const blackPlayerRow = await getQuery(`SELECT * FROM ${args.playersTableName} WHERE id = ?`, [args.blackPlayer.id]);
-    const blackPlayerOpponentsIds = JSON.parse(blackPlayerRow.opponentsIds);
-    blackPlayerOpponentsIds.push(args.whitePlayer.id);
-    await runQuery(`UPDATE ${args.playersTableName} SET opponentsIds = ?, gamesAsBlack = gamesAsBlack + 1 WHERE id = ?`, [JSON.stringify(blackPlayerOpponentsIds), args.blackPlayer.id]);
-
+    await runQuery(`INSERT INTO matches (tournamentId, whitePlayer, blackPlayer, boardNumber, round) VALUES (?, ?, ?, ?, ?)`, [args.whitePlayer.tournamentId, JSON.stringify(args.whitePlayer), JSON.stringify(args.blackPlayer), args.boardNumber, args.currentRound]);
     console.log('Match saved');
   } catch (err) {
     console.log(err);
   }
 };
 
-const findOpponentIndex = (players, player1, i) => players.findIndex((player2, j) => {
-  return j !== i &&
-    Math.abs(player1.score - player2.score) <= 1 &&
-    !JSON.parse(player1.opponentsIds).includes(player2.id);
-});
+const createMatch = (player1, player2, matchesCount, round) => {
+  const newMatch = {
+    whitePlayer: player1.gamesAsWhite <= player1.gamesAsBlack ? player1 : player2,
+    blackPlayer: player1.gamesAsWhite > player1.gamesAsBlack ? player1 : player2,
+    boardNumber: matchesCount + 1,
+    round: round
+  }
+  saveMatch(newMatch);
+  return newMatch;
+}
 
-const removePlayers = (players, i, j) => players.filter((_, index) => index !== i && index !== j);
+const groupPlayers = (players) => {
+  let groups = {};
+  players.forEach(player => {
+    if (!groups[player.score]) {
+      groups[player.score] = [];
+    }
+    groups[player.score].push(player);
+  });
+  return Object.values(groups);
+}
 
-const createMatch = (player1, player2, matchesCount, round) => ({
-  whitePlayer: player1.gamesAsWhite <= player1.gamesAsBlack ? player1 : player2,
-  blackPlayer: player1.gamesAsWhite > player1.gamesAsBlack ? player1 : player2,
-  result: null,
-  boardNumber: matchesCount + 1,
-  round: round
-});
+const divideGroup = (group) => {
+  let mid = Math.floor(group.length / 2);
+  return [group.slice(0, mid), group.slice(mid)];
+}
 
-const matchPlayers = (args) => {
-  let sortedPlayers = [...args.tournamentPlayers];
-  let newMatches = [];
-
-  while (sortedPlayers.length > 1) {
-    for (let i = 0; i < sortedPlayers.length; i++) {
-      let player1 = sortedPlayers[i];
-      let player2Index = findOpponentIndex(sortedPlayers, player1, i);
-
-      if (player2Index !== -1) {
-        let player2 = sortedPlayers[player2Index];
-        sortedPlayers = removePlayers(sortedPlayers, i, player2Index);
-        newMatches.push(createMatch(player1, player2, newMatches.length, args.round));
-        break;
-      }
+const matchBestPlayers = (subgroup1, remainingPlayers, round) => {
+  let matches = [];
+  while (subgroup1.length > 0 && remainingPlayers.length > 0) {
+    let player1 = subgroup1.shift();
+    let player2Index = remainingPlayers.findIndex(player2 => !player1.opponentsIds.includes(player2.id));
+    let player2;
+    if (player2Index !== -1) {
+      player2 = remainingPlayers.splice(player2Index, 1)[0];
+    } else {
+      player2 = remainingPlayers.shift();
+    }
+    matches.push(createMatch(player1, player2, matches.length, round));
+  }
+  if (subgroup1.length > 0) {
+    // Give the last player a free round if they haven't had one yet
+    let player1 = subgroup1.shift();
+    if (!player1.hasHadFreeRound) {
+      player1.score += 1; // Give the player a free point
+      player1.hasHadFreeRound = true;
+      matches.push(createMatch(player1, { id: 'Volno', score: 0 }, matches.length, round));
+    } else {
+      let player2 = remainingPlayers.shift();
+      matches.push(createMatch(player1, player2, matches.length, round));
     }
   }
+  return matches;
+}
 
-  newMatches.map((match) =>
-    saveMatch({
-      whitePlayer: match.whitePlayer,
-      blackPlayer: match.blackPlayer,
-      boardNumber: match.boardNumber,
-      round: match.round,
-      matchesTableName: args.matchesTableName,
-      playersTableName: args.playersTableName
-    })
-  )
+const matchPlayers = async (args) => {
+  const tournamentPlayers = await allQuery('SELECT * FROM players WHERE tournamentId = ?', [args.tournamentId]);
+  const round = args.currentRound;
+  let sortedPlayers = tournamentPlayers.sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    } else if (b.sonnenbornBerger !== a.sonnenbornBerger) {
+      return b.sonnenbornBerger - a.sonnenbornBerger;
+    } else if (b.bucholz !== a.bucholz) {
+      return b.bucholz - a.bucholz;
+    } else {
+      return a.startPosition - b.startPosition;
+    }
+  });
+
+  let groups = groupPlayers(sortedPlayers);
+  let remainingPlayers = [...sortedPlayers];
+  let newMatches = [];
+
+  for (let group of groups) {
+    let [subgroup1, subgroup2] = divideGroup(group);
+    newMatches.push(...matchBestPlayers(subgroup1, remainingPlayers, round));
+    newMatches.push(...matchBestPlayers(subgroup2, remainingPlayers, round));
+  }
 }
 
 const runQuery = (query, params) => {
@@ -184,22 +198,53 @@ const allQuery = (query, params) => {
   });
 }
 
+const updatePlayerStats = async (tournamentId, round) => {
+  const players = await allQuery(`SELECT * FROM players WHERE tournamentId = ?`, [tournamentId]);
+  const matches = await allQuery(`SELECT * FROM matches WHERE tournamentId = ? AND round = ?`, [tournamentId, round]);
+
+  matches.forEach((match) => {
+    const whitePlayer = players.find((player) => player.id === JSON.parse(match.whitePlayer).id);
+    const blackPlayer = players.find((player) => player.id === JSON.parse(match.blackPlayer).id);
+
+    whitePlayer.score += match.result === 1 ? 1 : match.result === 0.5 ? 0.5 : 0;
+    blackPlayer.score += match.result === 0 ? 1 : match.result === 0.5 ? 0.5 : 0;
+
+    whitePlayer.bucholz += blackPlayer.score;
+    blackPlayer.bucholz += whitePlayer.score;
+
+    whitePlayer.sonnenbornBerger += match.result === 1 ? blackPlayer.score : match.result === 0.5 ? 0.5 * blackPlayer.score : 0;
+    blackPlayer.sonnenbornBerger += match.result === 0 ? whitePlayer.score : match.result === 0.5 ? 0.5 * whitePlayer.score : 0;
+
+    whitePlayer.opponentIdSequence = JSON.stringify(JSON.parse(whitePlayer.opponentIdSequence).push(blackPlayer.id));
+    blackPlayer.opponentIdSequence = JSON.stringify(JSON.parse(blackPlayer.opponentIdSequence).push(whitePlayer.id));
+
+    whitePlayer.colorSequence = JSON.stringify(JSON.parse(whitePlayer.colorSequence).push('white'));
+    blackPlayer.colorSequence = JSON.stringify(JSON.parse(blackPlayer.colorSequence).push('black'));
+
+    runQuery(`UPDATE players SET score = ?, bucholz = ?, sonnenbornBerger = ?, opponentIdSequence = ?, colorSequence = ? WHERE id = ?`, [whitePlayer.score, whitePlayer.bucholz, whitePlayer.sonnenbornBerger, whitePlayer.opponentIdSequence, whitePlayer.colorSequence, whitePlayer.id]);
+    runQuery(`UPDATE players SET score = ?, bucholz = ?, sonnenbornBerger = ?, opponentIdSequence = ?, colorSequence = ? WHERE id = ?`, [blackPlayer.score, blackPlayer.bucholz, blackPlayer.sonnenbornBerger, blackPlayer.opponentIdSequence, blackPlayer.colorSequence, blackPlayer.id]);
+  });
+}
+
+const revertPlayerStats = async (tournamentId, round) => {
+  const matches = await allQuery(`SELECT * FROM matches WHERE round = ? AND tournamentId = ?`, [round, tournamentId]);
+
+  matches.forEach((match) => {
+    const revertedWhitePlayer = JSON.parse(match.whitePlayer);
+    const revertedBlackPlayer = JSON.parse(match.blackPlayer);
+
+    runQuery(`UPDATE players SET score = ?, bucholz = ?, sonnenbornBerger = ?, opponentIdSequence = ?, colorSequence = ? WHERE id = ?`, [revertedWhitePlayer.score, revertedWhitePlayer.bucholz, revertedWhitePlayer.sonnenbornBerger, revertedWhitePlayer.opponentIdSequence, revertedWhitePlayer.colorSequence, revertedWhitePlayer.id]);
+    runQuery(`UPDATE players SET score = ?, bucholz = ?, sonnenbornBerger = ?, opponentIdSequence = ?, colorSequence = ? WHERE id = ?`, [revertedBlackPlayer.score, revertedBlackPlayer.bucholz, revertedBlackPlayer.sonnenbornBerger, revertedBlackPlayer.opponentIdSequence, revertedBlackPlayer.colorSequence, revertedBlackPlayer.id]);
+  });
+}
+
 // IPC communication
 
 // Create tournament
 ipcMain.on('create-tournament', async (event, args) => {
   try {
-    const playersTableName = generatePlayersTableName(args.name);
-    const matchesTableName = generateMatchesTableName(args.name);
-
-    await runQuery('INSERT INTO tournaments (name, date, phase, round, playersTableName, matchesTableName) VALUES (?, ?, ?, ?, ?, ?)', [args.name, args.date, 'registration', 0, playersTableName, matchesTableName]);
+    await runQuery('INSERT INTO tournaments (name, roundsCount) VALUES (?, ?)', [args.name, args.roundsCount]);
     console.log('Tournament created');
-
-    await runQuery(`CREATE TABLE ${playersTableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, startPosition INTEGER, score REAL, bucholz REAL, sonnenbornBerger REAL, gamesAsWhite INTEGER, gamesAsBlack INTEGER, opponentsIds TEXT)`);
-    console.log('Players table created');
-
-    await runQuery(`CREATE TABLE ${matchesTableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, whitePlayer TEXT, blackPlayer TEXT, result TEXT, boardNumber INTEGER, round INTEGER)`);
-    console.log('Games table created');
   } catch (err) {
     console.log(err);
   }
@@ -208,7 +253,7 @@ ipcMain.on('create-tournament', async (event, args) => {
 // Update tournament
 ipcMain.on('put-tournament', async (event, args) => {
   try {
-    await runQuery('UPDATE tournaments SET name = ? WHERE id = ?', [args.name, args.id]);
+    await runQuery('UPDATE tournaments SET name = ? WHERE id = ?', [args.name, args.tournamentId]);
     console.log('Tournament updated');
   } catch (err) {
     console.log(err);
@@ -218,14 +263,9 @@ ipcMain.on('put-tournament', async (event, args) => {
 // Delete tournament
 ipcMain.on('delete-tournament', async (event, args) => {
   try {
-    await runQuery('DELETE FROM tournaments WHERE id = ?', [args.id]);
+    await runQuery('DELETE FROM tournaments WHERE id = ?', [args.tournamentId]);
+    await runQuery('DELETE FROM players WHERE tournamentId = ?', [args.tournamentId]);
     console.log('Tournament deleted');
-
-    await runQuery(`DROP TABLE ${args.playersTableName}`);
-    console.log('Players table deleted');
-
-    await runQuery(`DROP TABLE ${args.matchesTableName}`);
-    console.log('Matches table deleted');
   } catch (err) {
     console.log(err);
   }
@@ -244,7 +284,7 @@ ipcMain.handle('get-tournaments', async (event, args) => {
 // Get tournament
 ipcMain.handle('get-tournament', async (event, args) => {
   try {
-    const row = await getQuery('SELECT * FROM tournaments WHERE id = ?', [args.id]);
+    const row = await getQuery('SELECT * FROM tournaments WHERE id = ?', [args.tournamentId]);
     return row;
   } catch (err) {
     console.error(err);
@@ -254,7 +294,7 @@ ipcMain.handle('get-tournament', async (event, args) => {
 // Change tournament phase
 ipcMain.on('change-tournament-phase', async (event, args) => {
   try {
-    await runQuery('UPDATE tournaments SET phase = ? WHERE id = ?', [args.phase, args.id]);
+    await runQuery('UPDATE tournaments SET phase = ? WHERE id = ?', [args.phase, args.tournamentId]);
     console.log('Tournament phase updated');
   } catch (err) {
     console.log(err);
@@ -264,17 +304,15 @@ ipcMain.on('change-tournament-phase', async (event, args) => {
 // Next tournament round
 ipcMain.on('next-tournament-round', async (event, args) => {
   try {
-    await runQuery('UPDATE tournaments SET round = round + 1 WHERE id = ?', [args.id]);
-    const { round } = await getQuery('SELECT round FROM tournaments WHERE id = ?', [args.id]);
-    const { playersTableName, matchesTableName } = await getQuery('SELECT playersTableName, matchesTableName FROM tournaments WHERE id = ?', [args.id]);
-    let players = await allQuery('SELECT * FROM ' + playersTableName, []);
+    await runQuery('UPDATE tournaments SET currentRound = currentRound + 1 WHERE id = ?', [args.tournamentId]);
+    const { currentRound } = await getQuery('SELECT currentRound FROM tournaments WHERE id = ?', [args.tournamentId]);
 
-    if (round === 1) {
-      await Promise.all(players.map((player, index) => runQuery('UPDATE ' + playersTableName + ' SET startPosition = ? WHERE id = ?', [index + 1, player.id])));
-      players = await allQuery('SELECT * FROM ' + playersTableName, []);
+    if (currentRound === 1) {
+      let players = await allQuery('SELECT * FROM players WHERE tournamentId = ?', [args.tournamentId]);
+      await Promise.all(players.map((player, index) => runQuery('UPDATE players SET startPosition = ? WHERE id = ?', [index + 1, player.id])));
+    } else {
+      await updatePlayerStats({ tournamentId: args.tournamentId, round: currentRound - 1 });
     }
-
-    matchPlayers({ tournamentPlayers: players, round: round, matchesTableName: matchesTableName, playersTableName: playersTableName });
   } catch (err) {
     console.error(err);
   }
@@ -283,9 +321,10 @@ ipcMain.on('next-tournament-round', async (event, args) => {
 // Previous tournament round
 ipcMain.on('previous-tournament-round', async (event, args) => {
   try {
-    await runQuery('UPDATE tournaments SET round = round - 1 WHERE id = ?', [args.id]);
-    const { matchesTableName, round } = await getQuery('SELECT matchesTableName, round FROM tournaments WHERE id = ?', [args.id]);
-    await runQuery('DELETE FROM ' + matchesTableName + ' WHERE round > ?', [round]);
+    await runQuery('UPDATE tournaments SET currentRound = CASE WHEN currentRound > 0 THEN currentRound - 1 ELSE 0 END WHERE id = ?', [args.tournamentId]);
+    const { currentRound } = await getQuery('SELECT currentRound FROM tournaments WHERE id = ?', [args.tournamentId]);
+    await revertPlayerStats({ tournamentId: args.tournamentId, round: currentRound });
+    runQuery('DELETE FROM matches WHERE tournamentId = ? AND round > ?', [args.tournamentId, currentRound]);
     console.log('Tournament round updated');
   } catch (err) {
     console.log(err);
@@ -295,7 +334,7 @@ ipcMain.on('previous-tournament-round', async (event, args) => {
 // Get players
 ipcMain.handle('get-players', async (event, args) => {
   try {
-    const rows = await allQuery(`SELECT * FROM ${args.playersTableName}`, []);
+    const rows = await allQuery(`SELECT * FROM players WHERE tournamentId = ?`, [args.tournamentId]);
     return rows;
   } catch (err) {
     console.error(err);
@@ -305,7 +344,7 @@ ipcMain.handle('get-players', async (event, args) => {
 // Add player
 ipcMain.on('add-player', async (event, args) => {
   try {
-    await runQuery(`INSERT INTO ${args.playersTableName} (name, score, bucholz, sonnenbornBerger, gamesAsWhite, gamesAsBlack, opponentsIds) VALUES (?, ?, ?, ?, ?, ?, ?)`, [args.name, 0, 0, 0, 0, 0, JSON.stringify([])]);
+    await runQuery(`INSERT INTO players (name, tournamentId) VALUES (?, ?)`, [args.name, args.tournamentId]);
     console.log('Player added');
   } catch (err) {
     console.log(err);
@@ -315,7 +354,7 @@ ipcMain.on('add-player', async (event, args) => {
 // Remove player
 ipcMain.on('remove-player', async (event, args) => {
   try {
-    await runQuery(`DELETE FROM ${args.playersTableName} WHERE id = ?`, [args.id]);
+    await runQuery(`DELETE FROM players WHERE id = ?`, [args.playerId]);
     console.log('Player removed');
   } catch (err) {
     console.log(err);
@@ -325,7 +364,7 @@ ipcMain.on('remove-player', async (event, args) => {
 // Get matches
 ipcMain.handle('get-matches', async (event, args) => {
   try {
-    const rows = await allQuery(`SELECT * FROM ${args.matchesTableName} WHERE round = ?`, [args.round]);
+    const rows = await allQuery(`SELECT * FROM matches WHERE tournamentId = ? AND round = ?`, [args.tournamentId, args.currentRound]);
     return rows;
   } catch (err) {
     console.error(err);
@@ -335,8 +374,7 @@ ipcMain.handle('get-matches', async (event, args) => {
 // Save results
 ipcMain.on('save-result', async (event, args) => {
   try {
-    await runQuery(`UPDATE ${args.matchesTableName} SET result = ? WHERE id = ?`, [args.result, args.id]);
-    console.log(args.result, args.matchesTableName, args.id);
+    await runQuery(`UPDATE matches SET result = ? WHERE id = ?`, [args.result, args.matchId]);
     console.log('Result saved');
   } catch (err) {
     console.log(err);

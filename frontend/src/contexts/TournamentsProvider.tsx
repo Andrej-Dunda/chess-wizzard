@@ -10,7 +10,7 @@ type TournamentsContextType = {
   setSelectedTournament: React.Dispatch<React.SetStateAction<iTournament | undefined>>;
 
   getTournaments: () => void;
-  postTournament: (newTournamentName: string) => void;
+  postTournament: (newTournamentName: string, roundsCount: number) => void;
   getTournament: (tournamentId: number) => void;
   putTournament: (tournamentId: number, tournamentName: string) => void;
   deleteTournament: (tournament: iTournament) => void;
@@ -19,9 +19,9 @@ type TournamentsContextType = {
 
   tournamentPlayers: iTournamentPlayer[];
   setTournamentPlayers: React.Dispatch<React.SetStateAction<iTournamentPlayer[]>>;
-  getTournamentPlayers: (playersTableName: string) => void;
-  addTournamentPlayer: (playersTableName: string, newPlayerName: string) => void;
-  removeTournamentPlayer: (playersTableName: string, playerId: number) => void;
+  getTournamentPlayers: () => void;
+  addTournamentPlayer: (newPlayerName: string) => void;
+  removeTournamentPlayer: (playerId: number) => void;
 
   matches: iMatch[];
   setMatches: React.Dispatch<React.SetStateAction<iMatch[]>>;
@@ -175,49 +175,42 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
 
   useEffect(() => {
     getMatches()
-    selectedTournament && console.log(selectedTournament.round)
+    console.log('got matches')
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTournament?.round])
-
-  useEffect(() => {
-    console.log(matches)
-  }, [matches])
+  }, [selectedTournament?.currentRound])
 
   const getTournaments = async () => {
     const tournamentsData = await window.api.getTournaments();
     tournamentsData && setTournaments(tournamentsData)
   }
 
-  const postTournament = async (newTournamentName: string) => {
-    const date = new Date();
-    const formattedDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-    
+  const postTournament = async (newTournamentName: string, roundsCount: number) => {
     if (newTournamentName) {
-      await window.api.createTournament({ name: newTournamentName, date: formattedDate })
+      await window.api.createTournament({ name: newTournamentName, roundsCount: roundsCount })
       getTournaments()
       openSnackbar('Turnaj vytvořen!')
     }
   }
 
   const getTournament = async (tournamentId: number) => {
-    setSelectedTournament(await window.api.getTournament({ id: tournamentId }))
+    setSelectedTournament(await window.api.getTournament({ tournamentId: tournamentId }))
   }
 
   const putTournament = async (tournamentId: number, tournamentName: string) => {
-    await window.api.putTournament({ id: tournamentId, name: tournamentName })
+    await window.api.putTournament({ tournamentId: tournamentId, name: tournamentName })
     getTournaments()
     openSnackbar('Turnaj upraven!')
   }
 
   const deleteTournament = async (tournament: iTournament) => {
-    await window.api.deleteTournament({ id: tournament.id, playersTableName: tournament.playersTableName })
+    await window.api.deleteTournament({ tournamentId: tournament.id })
     getTournaments()
     openSnackbar('Turnaj smazán!')
   }
 
   const changeTournamentPhase = async (phase: string) => {
     if (selectedTournament) {
-      await window.api.changeTournamentPhase({ id: selectedTournament.id, phase: phase })
+      await window.api.changeTournamentPhase({ tournamentId: selectedTournament.id, phase: phase })
       await getTournament(selectedTournament.id)
     }
   }
@@ -225,16 +218,21 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   const changeTournamentRound = async (round: string) => {
     if (!selectedTournament) return
     if (round === 'next') {
-      await window.api.nextTournamentRound({ id: selectedTournament.id })
+      await window.api.nextTournamentRound({ tournamentId: selectedTournament.id })
+      console.log('next round')
     } else if (round === 'previous') {
-      await window.api.previousTournamentRound({ id: selectedTournament.id })
+      await window.api.previousTournamentRound({ tournamentId: selectedTournament.id })
+      console.log('previous round')
     }
+    console.log('before getTournament')
     await getTournament(selectedTournament.id)
+    console.log('round changed')
+    setSelectedMatchIndex(undefined)
   }
 
   const getTournamentPlayers = async () => {
     if (!selectedTournament) return
-    const players: iTournamentPlayer[] = await window.api.getPlayers({ playersTableName: selectedTournament.playersTableName, matchesTableName: selectedTournament.matchesTableName});
+    const players: iTournamentPlayer[] = await window.api.getPlayers({ tournamentId: selectedTournament.id });
     const sortedPlayers = players.sort((a, b) => {
       if (b.score !== a.score) {
         return b.score - a.score;
@@ -249,22 +247,21 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     setTournamentPlayers(sortedPlayers);
   }
 
-  const addTournamentPlayer = async (playersTableName: string, newPlayerName: string) => {
-    await window.api.addPlayer({ playersTableName: playersTableName, name: newPlayerName })
+  const addTournamentPlayer = async (newPlayerName: string) => {
+    selectedTournament && await window.api.addPlayer({ name: newPlayerName, tournamentId: selectedTournament.id })
     getTournamentPlayers()
     openSnackbar('Hráč přidán!')
   }
 
-  const removeTournamentPlayer = async (playersTableName: string, playerId: number) => {
-    await window.api.removePlayer({ playersTableName: playersTableName, id: playerId })
+  const removeTournamentPlayer = async (playerId: number) => {
+    await window.api.removePlayer({ playerId: playerId })
     getTournamentPlayers()
     openSnackbar('Hráč odebrán!')
   }
 
   const setResult = async (result: number) => {
     if (selectedMatchIndex === undefined || selectedMatchIndex === -1) return
-    console.log('selectedMatch', matches[selectedMatchIndex])
-    selectedTournament && await window.api.saveResult({ matchesTableName: selectedTournament.matchesTableName, id: matches[selectedMatchIndex].id, result: result })
+    selectedTournament && await window.api.saveResult({ matchId: matches[selectedMatchIndex].id, result: result })
     getMatches()
     // find next match with null result after the selectedMatchIndex
     const nextMatchIndex = matches.findIndex((match, index) => index > selectedMatchIndex && match.result === null)
@@ -275,8 +272,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
 
   const getMatches = async () => {
     if (selectedTournament) {
-      console.log('before getMatches')
-      const matchesData = await window.api.getMatches({ matchesTableName: selectedTournament.matchesTableName, round: selectedTournament.round })
+      const matchesData = await window.api.getMatches({ tournamentId: selectedTournament.id, round: selectedTournament.currentRound })
       console.log('matchesData', matchesData)
       const parsedMatches: iMatch[] = matchesData.map((match: any) => {
         return {
@@ -285,7 +281,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
           blackPlayer: JSON.parse(match.blackPlayer),
           result: match.result,
           boardNumber: match.boardNumber,
-          round: match.round
+          round: match.currentRound
         }
       })
       setMatches(parsedMatches.sort((a, b) => a.boardNumber - b.boardNumber));
