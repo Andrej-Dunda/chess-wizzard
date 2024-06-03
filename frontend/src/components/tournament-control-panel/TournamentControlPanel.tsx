@@ -9,8 +9,8 @@ const TournamentControlPanel = () => {
   const firstRound: boolean = selectedTournament?.currentRound === 1;
   
   const backToRegistration = async () => {
+    await changeTournamentPhase('registration')
     await changeTournamentRound('previous')
-    changeTournamentPhase('registration')
   }
 
   return (
@@ -21,22 +21,29 @@ const TournamentControlPanel = () => {
           Zpět k registraci
         </button>
         : (
-          <>
-            <button className="previous-round-button dark" onClick={() => changeTournamentRound('previous')}>
-              <FontAwesomeIcon icon={faAnglesLeft} />
-              Zpět k předchozímu kolu
-            </button>
-            <button className='finish-tournament-button dark' onClick={() => changeTournamentPhase('finished')}>
-              Ukončit turnaj
-              <FontAwesomeIcon icon={faFlagCheckered} />
-            </button>
-          </>
+          <button className="previous-round-button dark" onClick={() => changeTournamentRound('previous')}>
+            <FontAwesomeIcon icon={faAnglesLeft} />
+            Zpět k předchozímu kolu
+          </button>
         )
       }
-      <button className={`next-round-button dark${isAnyResultNull ? ' disabled' : ''}`} title={isAnyResultNull ? 'Vyplňte všechny výsledky!' : ''} onClick={() => changeTournamentRound('next')}>
-        Další kolo
-        <FontAwesomeIcon icon={faAnglesRight} />
-      </button>
+      {
+        selectedTournament?.currentRound && selectedTournament?.currentRound < selectedTournament?.roundsCount ? (
+          <button className={`next-round-button dark${isAnyResultNull ? ' disabled' : ''}`} title={isAnyResultNull ? 'Vyplňte všechny výsledky!' : ''} onClick={() => !isAnyResultNull && changeTournamentRound('next')}>
+            Další kolo
+            <FontAwesomeIcon icon={faAnglesRight} />
+          </button>
+        ) : (
+          <button
+            className={`finish-tournament-button dark${isAnyResultNull ? ' disabled' : ''}`}
+            onClick={() => !isAnyResultNull && changeTournamentPhase('finished')}
+            title={isAnyResultNull ? 'Vyplňte všechny výsledky!' : ''}
+          >
+            Ukončit turnaj
+            <FontAwesomeIcon icon={faFlagCheckered} />
+          </button>
+        )
+      }
     </div>
   )
 }

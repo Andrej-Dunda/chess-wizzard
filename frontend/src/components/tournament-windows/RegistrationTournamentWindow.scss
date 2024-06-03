@@ -34,8 +34,8 @@
     padding: 32px;
 
     .players-section {
-      min-width: fit-content;
       width: 500px;
+      max-width: 500px;
       max-height: 100%;
       overflow: hidden;
 
@@ -98,7 +98,6 @@
 
         .players-wrapper {
           .player {
-            max-width: 60vw;
             padding: 8px;
             border-bottom: 1px solid var(--grayscale-150);
 
@@ -108,6 +107,7 @@
             align-items: center;
 
             .player-name {
+              max-width: calc(100% - 20px);
               text-wrap: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;

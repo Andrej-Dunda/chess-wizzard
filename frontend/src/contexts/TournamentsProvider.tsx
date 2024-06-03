@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import React from 'react';
-import { iMatch, iTournament, iTournamentPlayer } from '../interfaces/tournaments-interface';
+import { iMatch, iRawMatch, iRawTournamentPlayer, iTournament, iTournamentPlayer } from '../interfaces/tournaments-interface';
 import { useSnackbar } from './SnackbarProvider';
 
 type TournamentsContextType = {
@@ -39,116 +39,7 @@ type TournamentsProviderProps = {
 };
 
 export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
-  const [tournaments, setTournaments] = useState<iTournament[]>([
-    // {
-    //   id: 'asdf1',
-    //   name: 'Turnaj 1',
-    //   date: '2024-1-10',
-    //   participants: [
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Andrej'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Jirka'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Honza'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Kuba'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Lukáš'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Martin'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Michal'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Petr'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Tomáš'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Vojta'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Zdeněk'
-    //     }
-    //   ]
-    // },
-    // {
-    //   id: 'asdf2',
-    //   name: 'Turnaj 2',
-    //   date: '2024-2-10',
-    //   participants: []
-    // },
-    // {
-    //   id: 'asdf3',
-    //   name: 'Turnaj 3',
-    //   date: '2024-3-10',
-    //   participants: [
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Branibor'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Borek'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Drahoslav'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Egon'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'František'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Gustav'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Hynek'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Ivan'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Jaroslav'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Kamil'
-    //     },
-    //     {
-    //       id: uuidv4(),
-    //       name: 'Ladislav'
-    //     }
-    //   ]
-    // }
-  ])
+  const [tournaments, setTournaments] = useState<iTournament[]>([])
   const [selectedTournament, setSelectedTournament] = useState<iTournament>()
   const [tournamentPlayers, setTournamentPlayers] = useState<iTournamentPlayer[]>([])
   const { openSnackbar } = useSnackbar();
@@ -168,16 +59,11 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   useEffect(() => {
     if (selectedTournament) {
       getTournamentPlayers();
+      getMatches();
       localStorage.setItem('selectedTournamentId', selectedTournament.id.toString());
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTournament]);
-
-  useEffect(() => {
-    getMatches()
-    console.log('got matches')
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTournament?.currentRound])
 
   const getTournaments = async () => {
     const tournamentsData = await window.api.getTournaments();
@@ -217,23 +103,29 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
 
   const changeTournamentRound = async (round: string) => {
     if (!selectedTournament) return
+
+    setSelectedMatchIndex(undefined)
+    setMatches([])
+
     if (round === 'next') {
       await window.api.nextTournamentRound({ tournamentId: selectedTournament.id })
-      console.log('next round')
     } else if (round === 'previous') {
       await window.api.previousTournamentRound({ tournamentId: selectedTournament.id })
-      console.log('previous round')
     }
-    console.log('before getTournament')
-    await getTournament(selectedTournament.id)
-    console.log('round changed')
-    setSelectedMatchIndex(undefined)
+    getTournament(selectedTournament.id)
   }
 
   const getTournamentPlayers = async () => {
     if (!selectedTournament) return
-    const players: iTournamentPlayer[] = await window.api.getPlayers({ tournamentId: selectedTournament.id });
-    const sortedPlayers = players.sort((a, b) => {
+    const players: iRawTournamentPlayer[] = await window.api.getPlayers({ tournamentId: selectedTournament.id });
+    const parsedPlayers = players.map((player: iRawTournamentPlayer) => {
+      return {
+        ...player,
+        opponentIdSequence: JSON.parse(player.opponentIdSequence),
+        colorSequence: JSON.parse(player.colorSequence)
+      }
+    });
+    const sortedPlayers: iTournamentPlayer[] = parsedPlayers.sort((a: iTournamentPlayer, b: iTournamentPlayer) => {
       if (b.score !== a.score) {
         return b.score - a.score;
       } else if (b.sonnenbornBerger !== a.sonnenbornBerger) {
@@ -267,21 +159,20 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     const nextMatchIndex = matches.findIndex((match, index) => index > selectedMatchIndex && match.result === null)
     // if nextMatchIndex is -1, find first match with null result
     setSelectedMatchIndex(nextMatchIndex === -1 ? matches.findIndex(match => match.result === null) : nextMatchIndex)
-    // selectedMatchIndex < matches.length - 1 && setSelectedMatchIndex(selectedMatchIndex + 1)
   }
 
   const getMatches = async () => {
     if (selectedTournament) {
-      const matchesData = await window.api.getMatches({ tournamentId: selectedTournament.id, round: selectedTournament.currentRound })
-      console.log('matchesData', matchesData)
-      const parsedMatches: iMatch[] = matchesData.map((match: any) => {
+      console.log(selectedTournament.currentRound)
+      const matchesData = await window.api.getMatches({ tournamentId: selectedTournament.id, currentRound: selectedTournament.currentRound })
+      const parsedMatches: iMatch[] = matchesData.map((match: iRawMatch) => {
         return {
           id: match.id,
           whitePlayer: JSON.parse(match.whitePlayer),
           blackPlayer: JSON.parse(match.blackPlayer),
           result: match.result,
           boardNumber: match.boardNumber,
-          round: match.currentRound
+          round: match.round
         }
       })
       setMatches(parsedMatches.sort((a, b) => a.boardNumber - b.boardNumber));

@@ -63,12 +63,12 @@ const RegistrationTournamentWindow = () => {
             <>
               <div className="players">
                 <div className="players-wrapper">
-                  {tournamentPlayers.sort().map((player: iTournamentPlayer, index) => (
-                    <div key={index} className="player">
-                      <span className="player-name">{player.name}</span>
-                      <FontAwesomeIcon icon={faXmark} color={grayscale900} className='remove-icon' onClick={() => removePlayer(player.id)} />
-                    </div>
-                  ))}
+                {tournamentPlayers.sort((a, b) => a.name.localeCompare(b.name)).map((player: iTournamentPlayer, index) => (
+                  <div key={index} className="player">
+                    <span className="player-name">{player.name}</span>
+                    <FontAwesomeIcon icon={faXmark} color={grayscale900} className='remove-icon' onClick={() => removePlayer(player.id)} />
+                  </div>
+                ))}
                 </div>
               </div>
               {tournamentPlayers.length > 1 && (

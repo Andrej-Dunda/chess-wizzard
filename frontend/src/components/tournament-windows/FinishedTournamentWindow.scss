@@ -1,3 +1,125 @@
 .finished-tournament-window {
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  flex-grow: 1;
+
+  .tournament-window-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    background-color: var(--grayscale-900);
+    color: var(--grayscale-100);
+
+    .tournament-title {
+      padding: 16px;
+    }
+
+    .home-button {
+      width: 32px;
+      height: 32px;
+      box-sizing: border-box;
+      margin-left: 96px;
+      margin-right: 8px;
+      text-align: right;
+      cursor: pointer;
+
+      font-size: 22px;
+
+      &:hover {
+        color: var(--grayscale-200);
+      }
+    }
+
+    .results-toggle {
+      height: 100%;
+
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 8px;
+
+      font-size: 17px;
+
+      .toggle-button {
+        padding: 8px;
+
+        &.active {
+          font-weight: 900;
+          border-bottom: 2px solid var(--grayscale-100);
+        }
+      }
+    }
+  }
+
+  .h4 {
+    text-align: center;
+  }
+
+  .table-wrapper {
+    border-radius: 8px;
+    overflow: auto;
+    max-height: calc(100vh - 225px);
+
+    box-shadow: 0px 0px 11px -4px rgba(0,0,0,0.75);
+    -webkit-box-shadow: 0px 0px 11px -4px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 0px 11px -4px rgba(0,0,0,0.75);
+
+    .results-table {
+      min-width: 600px;
+      max-width: 1000px;
+      border-collapse: collapse;
+
+      .heading-row {
+        background-color: var(--grayscale-900);
+        color: var(--grayscale-100);
+
+        th {
+          width: fit-content;
+          padding: 8px 16px;
+          position: sticky;
+          top: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-wrap: nowrap;
+
+          &.width-s {
+            max-width: 50px;
+          }
+        }
+      }
+
+      tbody {
+        .player-row {
+          td {
+            width: fit-content;
+            padding: 8px 16px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-wrap: nowrap;
+
+            .start-position {
+              min-width: fit-content;
+            }
+
+            &.name {
+              min-width: 200px;
+              max-width: 30vw;
+            }
+
+            &.width-s {
+              max-width: 50px;
+            }
+          }
+
+          &:nth-child(even) {
+            background-color: var(--grayscale-150);
+          }
+        }
+      }
+    }
+  }
 }
