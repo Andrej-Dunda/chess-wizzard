@@ -360,6 +360,12 @@ ipcMain.handle('get-tournament', async (event, args) => {
 ipcMain.on('change-tournament-phase', async (event, args) => {
   try {
     await runQuery('UPDATE tournaments SET phase = ? WHERE id = ?', [args.phase, args.tournamentId]);
+    const { currentRound } = await getQuery('SELECT currentRound FROM tournaments WHERE id = ?', [args.tournamentId]);
+    if (args.phase === 'finished') {
+      await updatePlayerStats(args.tournamentId, currentRound);
+    } else if (args.phase === 'playtime' && args.currentPhase === 'finished') {
+      await revertPlayerStats(args.tournamentId, currentRound)
+    }
     console.log('Tournament phase updated');
   } catch (err) {
     console.log(err);

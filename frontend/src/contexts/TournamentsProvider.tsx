@@ -96,7 +96,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
 
   const changeTournamentPhase = async (phase: string) => {
     if (selectedTournament) {
-      await window.api.changeTournamentPhase({ tournamentId: selectedTournament.id, phase: phase })
+      await window.api.changeTournamentPhase({ tournamentId: selectedTournament.id, phase: phase, currentPhase: selectedTournament.phase })
       await getTournament(selectedTournament.id)
     }
   }
