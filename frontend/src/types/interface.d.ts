@@ -14,6 +14,7 @@ export interface IElectronAPI {
   getMatches: (data: any) => Promise<any>,
   getAllMatches: (data: any) => Promise<any>,
   saveResult: (data: any) => Promise<any>,
+  getAllMatches: (data: any) => Promise<any>,
 }
 
 declare global {

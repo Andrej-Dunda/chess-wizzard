@@ -25,11 +25,16 @@ type TournamentsContextType = {
 
   matches: iMatch[];
   setMatches: React.Dispatch<React.SetStateAction<iMatch[]>>;
+  allTournamentMatches: iMatch[][];
+  setAllTournamentMatches: React.Dispatch<React.SetStateAction<iMatch[][]>>;
+  getAllMatches: () => void;
   selectedMatchIndex: number | undefined;
   setSelectedMatchIndex: React.Dispatch<React.SetStateAction<number | undefined>>;
   setResult: (result: number) => void;
   isAnyResultNull: boolean;
   getMatches: () => void;
+
+  formatNumber: (num: number) => string;
 };
 
 export const TournamentsContext = createContext<TournamentsContextType | null>(null);
@@ -44,6 +49,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   const [tournamentPlayers, setTournamentPlayers] = useState<iTournamentPlayer[]>([])
   const { openSnackbar } = useSnackbar();
   const [matches, setMatches] = useState<iMatch[]>([])
+  const [allTournamentMatches, setAllTournamentMatches] = useState<iMatch[][]>([]);
   const [selectedMatchIndex, setSelectedMatchIndex] = useState<number>();
   const isAnyResultNull = matches.some(match => match.result === null);
 
@@ -54,6 +60,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     if (selectedTournamentId) {
       getTournament(parseInt(selectedTournamentId));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -61,6 +68,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
       getTournamentPlayers();
       getMatches();
       localStorage.setItem('selectedTournamentId', selectedTournament.id.toString());
+      getAllMatches();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTournament]);
@@ -113,6 +121,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
       await window.api.previousTournamentRound({ tournamentId: selectedTournament.id })
     }
     getTournament(selectedTournament.id)
+    getAllMatches()
   }
 
   const getTournamentPlayers = async () => {
@@ -179,6 +188,37 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     }
   }
 
+  const getAllMatches = async () => {
+    if (selectedTournament) {
+      const matchesData = await window.api.getAllMatches({ tournamentId: selectedTournament.id, currentRound: selectedTournament.currentRound })
+      console.log(matchesData)
+      const parsedMatches: iMatch[][] = matchesData.map((roundMatches: iRawMatch[]) => {
+        return roundMatches.map((match: iRawMatch) => {
+          return {
+            id: match.id,
+            whitePlayer: JSON.parse(match.whitePlayer),
+            blackPlayer: JSON.parse(match.blackPlayer),
+            result: match.result,
+            boardNumber: match.boardNumber,
+            round: match.round
+          }
+        }).sort((a, b) => a.boardNumber - b.boardNumber)
+      })
+      setAllTournamentMatches(parsedMatches);
+    }
+  }
+
+  const formatNumber = (num: number) => {
+    if (num === 0.5) return '½';
+    const integerPart = Math.floor(num);
+    const decimalPart = num - integerPart;
+    if (decimalPart === 0.5) {
+      return `${integerPart}½`;
+    } else {
+      return num.toString();
+    }
+  }
+
   const contextValue: TournamentsContextType = {
     tournaments: tournaments,
     setTournaments: setTournaments,
@@ -201,11 +241,16 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
 
     matches,
     setMatches,
+    allTournamentMatches,
+    setAllTournamentMatches,
+    getAllMatches,
     selectedMatchIndex,
     setSelectedMatchIndex,
     setResult,
     isAnyResultNull,
-    getMatches
+    getMatches,
+
+    formatNumber
   };
 
   return (

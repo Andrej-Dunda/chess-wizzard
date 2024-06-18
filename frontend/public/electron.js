@@ -421,7 +421,7 @@ const randomInt = (min, max) => Math.floor(2 * Math.random() * (max - min + 1) +
 // Add player
 ipcMain.on('add-player', async (event, args) => {
   try {
-    await runQuery(`INSERT INTO players (name, tournamentId, score, bucholz, sonnenbornBerger) VALUES (?, ?, ?, ?, ?)`, [args.name, args.tournamentId, randomInt(0, 1), randomInt(0, 1), randomInt(0, 1)]);
+    await runQuery(`INSERT INTO players (name, tournamentId) VALUES (?, ?)`, [args.name, args.tournamentId]);
     console.log('Player added');
   } catch (err) {
     console.log(err);

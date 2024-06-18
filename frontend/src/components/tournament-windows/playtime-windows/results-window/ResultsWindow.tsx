@@ -1,22 +1,12 @@
 import { useTournaments } from '../../../../contexts/TournamentsProvider';
+import PlayerNameComponent from '../../../player-name-component/PlayerNameComponent';
 import TournamentControlPanel from '../../../tournament-control-panel/TournamentControlPanel';
 import './ResultsWindow.scss'
 import React from 'react'
 
 const ResultsWindow = () => {
-  const { selectedTournament, tournamentPlayers } = useTournaments();
+  const { selectedTournament, tournamentPlayers, formatNumber } = useTournaments();
   const firstRound: boolean = selectedTournament?.currentRound === 1;
-
-  const formatNumber = (num: number) => {
-    if (num === 0.5) return '½';
-    const integerPart = Math.floor(num);
-    const decimalPart = num - integerPart;
-    if (decimalPart === 0.5) {
-      return `${integerPart}½`;
-    } else {
-      return num;
-    }
-  }
 
   return (
     <section className='results-window'>
@@ -39,10 +29,10 @@ const ResultsWindow = () => {
                 <tr key={index} className='player-row'>
                   {!firstRound && <td className='text-right width-s'>{index + 1}</td>}
                   <td className='text-center width-s'>{player.startPosition}</td>
-                  <td className='name text-left'>{player.name}</td>
+                  <td className='name text-left'><PlayerNameComponent playerId={player.id} /></td>
                   <td className='text-center width-m'>{formatNumber(player.score)}</td>
-                  <td className='text-center width-m'>{formatNumber(player.sonnenbornBerger)}</td>
-                  <td className='text-center width-m'>{formatNumber(player.bucholz)}</td>
+                  <td className='text-center width-m'>{player.sonnenbornBerger}</td>
+                  <td className='text-center width-m'>{player.bucholz}</td>
                 </tr>
               ))
             }

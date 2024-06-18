@@ -1,20 +1,14 @@
 import { useTournaments } from '../../../contexts/TournamentsProvider';
-import { iMatch, iRawMatch } from '../../../interfaces/tournaments-interface';
+import { iMatch } from '../../../interfaces/tournaments-interface';
 import './TournamentRoundsWindow.scss'
 import React, { useEffect, useState } from 'react'
 import Dropdown from '../../buttons/dropdown/Dropdown';
+import PlayerNameComponent from '../../player-name-component/PlayerNameComponent';
 
 const TournamentRoundsWindow = () => {
-  const [allTournamentMatches, setAllTournamentMatches] = useState<iMatch[][]>([]);
-  const { setSelectedMatchIndex, selectedTournament } = useTournaments();
+  const { setSelectedMatchIndex, selectedTournament, allTournamentMatches, formatNumber } = useTournaments();
   const [selectedRound, setSelectedRound] = useState<string>('1');
   const [selectedRoundMatches, setSelectedRoundMatches] = useState<iMatch[]>([]);
-
-  useEffect(() => {
-    getAllMatches();
-    console.log('TournamentRoundsWindow rendered')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   useEffect(() => {
     if (allTournamentMatches.length > 0) {
@@ -29,37 +23,6 @@ const TournamentRoundsWindow = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRound])
-
-  const getAllMatches = async () => {
-    if (selectedTournament) {
-      const matchesData = await window.api.getAllMatches({ tournamentId: selectedTournament.id, currentRound: selectedTournament.currentRound })
-      console.log(matchesData)
-      const parsedMatches: iMatch[][] = matchesData.map((roundMatches: iRawMatch[]) => {
-        return roundMatches.map((match: iRawMatch) => {
-          return {
-            id: match.id,
-            whitePlayer: JSON.parse(match.whitePlayer),
-            blackPlayer: JSON.parse(match.blackPlayer),
-            result: match.result,
-            boardNumber: match.boardNumber,
-            round: match.round
-          }
-        }).sort((a, b) => a.boardNumber - b.boardNumber)
-      })
-      setAllTournamentMatches(parsedMatches);
-    }
-  }
-
-  const formatNumber = (num: number) => {
-    if (num === 0.5) return '½';
-    const integerPart = Math.floor(num);
-    const decimalPart = num - integerPart;
-    if (decimalPart === 0.5) {
-      return `${integerPart}½`;
-    } else {
-      return num;
-    }
-  }
 
   return (
     <div className='tournament-rounds-window'>
@@ -86,7 +49,7 @@ const TournamentRoundsWindow = () => {
                     <tr key={index} className='match' onClick={() => setSelectedMatchIndex(index)}>
                       <td className="board-number width-s text-center">{match.boardNumber}</td>
                       <td className="start-position width-s text-center">{match.whitePlayer.startPosition}</td>
-                      <td className="name text-left">{match.whitePlayer.name}</td>
+                      <td className="name text-left"><PlayerNameComponent playerId={match.whitePlayer.id} /></td>
                       <td className="score text-center">{formatNumber(match.whitePlayer.score)}</td>
                       <td className="result text-center">
                         {
@@ -96,7 +59,7 @@ const TournamentRoundsWindow = () => {
                         }
                       </td>
                       <td className="score text-center">{formatNumber(match.blackPlayer.score)}</td>
-                      <td className="name text-left">{match.blackPlayer.name}</td>
+                      <td className="name text-left"><PlayerNameComponent playerId={match.blackPlayer.id} /></td>
                       <td className="start-position width-s text-center">{match.blackPlayer.startPosition}</td>
                     </tr>
                   ))

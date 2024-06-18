@@ -3,20 +3,10 @@ import { useTournaments } from '../../../contexts/TournamentsProvider';
 import './FinalResultsWindow.scss'
 import { faAnglesLeft, faMedal } from '@fortawesome/free-solid-svg-icons';
 import React from 'react'
+import PlayerNameComponent from '../../player-name-component/PlayerNameComponent';
 
 const FinalResultsWindow = () => {
-  const { changeTournamentPhase, selectedTournament, tournamentPlayers } = useTournaments();
-  
-  const formatNumber = (num: number) => {
-    if (num === 0.5) return '½';
-    const integerPart = Math.floor(num);
-    const decimalPart = num - integerPart;
-    if (decimalPart === 0.5) {
-      return `${integerPart}½`;
-    } else {
-      return num;
-    }
-  }
+  const { changeTournamentPhase, selectedTournament, tournamentPlayers, formatNumber } = useTournaments();
 
   return (
     <div className='final-results'>
@@ -39,10 +29,10 @@ const FinalResultsWindow = () => {
                 <tr key={index} className={`player-row`}>
                   <td className='text-right width-s position'>{index < 3 ? <FontAwesomeIcon icon={faMedal} className={index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : ''} /> : index + 1}</td>
                   <td className='text-center width-s'>{player.startPosition}</td>
-                  <td className='name text-left'>{player.name}</td>
+                  <td className='name text-left'><PlayerNameComponent playerId={player.id} /></td>
                   <td className='text-center width-m'>{formatNumber(player.score)}</td>
-                  <td className='text-center width-m'>{formatNumber(player.sonnenbornBerger)}</td>
-                  <td className='text-center width-m'>{formatNumber(player.bucholz)}</td>
+                  <td className='text-center width-m'>{player.sonnenbornBerger}</td>
+                  <td className='text-center width-m'>{player.bucholz}</td>
                 </tr>
               ))
             }
