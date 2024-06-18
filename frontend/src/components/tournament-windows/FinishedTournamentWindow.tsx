@@ -4,7 +4,8 @@ import './FinishedTournamentWindow.scss'
 import React, { useState } from 'react'
 import { faHome } from '@fortawesome/free-solid-svg-icons';
 import { useNav } from '../../contexts/NavigationProvider';
-import FinalResults from './finished-tournament-windows/FinalResults';
+import FinalResultsWindow from './finished-tournament-windows/FinalResultsWindow';
+import TournamentRoundsWindow from './finished-tournament-windows/TournamentRoundsWindow';
 
 const FinishedTournamentWindow = () => {
   const { selectedTournament } = useTournaments();
@@ -22,7 +23,7 @@ const FinishedTournamentWindow = () => {
         <FontAwesomeIcon className='home-button' onClick={toHome} icon={faHome} />
       </div>
       {
-        showResults ? <FinalResults /> : <div>Průběh turnaje</div>
+        showResults ? <FinalResultsWindow /> : <TournamentRoundsWindow />
       }
     </div>
   )

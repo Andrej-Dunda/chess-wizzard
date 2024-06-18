@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('api', {
   getPlayers: (args) => ipcRenderer.invoke('get-players', args),
   getTournament: (args) => ipcRenderer.invoke('get-tournament', args),
   getMatches: (args) => ipcRenderer.invoke('get-matches', args),
+  getAllMatches: (args) => ipcRenderer.invoke('get-all-matches', args),
   // Send Methods
   createTournament: (args) => ipcRenderer.send('create-tournament', args),
   deleteTournament: (args) => ipcRenderer.send('delete-tournament', args),

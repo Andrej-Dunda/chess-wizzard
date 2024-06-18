@@ -24,6 +24,7 @@
 
   .dropdown-items-wrapper {
     display: none;
+    z-index: 200;
 
     &.open {
       display: flex;

@@ -12,6 +12,7 @@ export interface IElectronAPI {
   previousTournamentRound: (data: any) => Promise<any>,
   saveMatches: (data: any) => Promise<any>,
   getMatches: (data: any) => Promise<any>,
+  getAllMatches: (data: any) => Promise<any>,
   saveResult: (data: any) => Promise<any>,
 }
 

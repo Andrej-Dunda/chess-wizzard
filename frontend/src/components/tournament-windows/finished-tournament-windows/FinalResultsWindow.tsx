@@ -1,10 +1,10 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTournaments } from '../../../contexts/TournamentsProvider';
-import './FinalResults.scss'
+import './FinalResultsWindow.scss'
 import { faAnglesLeft, faMedal } from '@fortawesome/free-solid-svg-icons';
 import React from 'react'
 
-const FinalResults = () => {
+const FinalResultsWindow = () => {
   const { changeTournamentPhase, selectedTournament, tournamentPlayers } = useTournaments();
   
   const formatNumber = (num: number) => {
@@ -57,4 +57,4 @@ const FinalResults = () => {
   )
 }
 
-export default FinalResults
+export default FinalResultsWindow

@@ -161,7 +161,7 @@ const updatePlayerStats = async (tournamentId, round) => {
 }
 
 const revertPlayerStats = async (tournamentId, round) => {
-  console.log({tournamentId: tournamentId, round: round})
+  console.log({ tournamentId: tournamentId, round: round })
   const matches = await allQuery(`SELECT * FROM matches WHERE round = ? AND tournamentId = ?`, [round, tournamentId]);
   console.log('matches: ', matches)
 
@@ -222,15 +222,15 @@ const getSortedPlayers = async (tournamentId) => {
   return sortedPlayers;
 }
 
-// Check if two players already played against each other
-const playersPlayed = (player, opponent) => {
-  return player.opponentIdSequence.includes(opponent.id);
-}
+// // Check if two players already played against each other
+// const playersPlayed = (player, opponent) => {
+//   return player.opponentIdSequence.includes(opponent.id);
+// }
 
-// Check if a player played with the same color in the last two rounds and his opponent played with the same color in the last two rounds
-const sameColorInLastTwoRounds = (player, opponent) => {
-  return player.colorSequence[player.colorSequence.length - 1] === opponent.colorSequence[opponent.colorSequence.length - 1] && player.colorSequence[player.colorSequence.length - 2] === opponent.colorSequence[opponent.colorSequence.length - 2] && player.colorSequence[player.colorSequence.length - 1] === player.colorSequence[player.colorSequence.length - 2];
-}
+// // Check if a player played with the same color in the last two rounds and his opponent played with the same color in the last two rounds
+// const sameColorInLastTwoRounds = (player, opponent) => {
+//   return player.colorSequence[player.colorSequence.length - 1] === opponent.colorSequence[opponent.colorSequence.length - 1] && player.colorSequence[player.colorSequence.length - 2] === opponent.colorSequence[opponent.colorSequence.length - 2] && player.colorSequence[player.colorSequence.length - 1] === player.colorSequence[player.colorSequence.length - 2];
+// }
 
 // Divide players into subgroups based on their score
 const dividePlayersIntoSubgroups = (tournamentPlayers) => {
@@ -298,7 +298,7 @@ const generateNextRoundMatches = async (tournamentId, currentRound) => {
     if (match[1] === 'Volno') {
       await saveMatch({ whitePlayer: match[0], blackPlayer: { name: 'Volno', score: 0 }, boardNumber: index + 1, currentRound: currentRound });
     } else {
-      await saveMatch({ whitePlayer: match[0], blackPlayer: match[1], boardNumber: index + 1, currentRound: currentRound  });
+      await saveMatch({ whitePlayer: match[0], blackPlayer: match[1], boardNumber: index + 1, currentRound: currentRound });
     }
   });
 }
@@ -443,6 +443,21 @@ ipcMain.handle('get-matches', async (event, args) => {
   try {
     const rows = await allQuery(`SELECT * FROM matches WHERE tournamentId = ? AND round = ?`, [args.tournamentId, args.currentRound]);
     return rows;
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+// Get all matches
+ipcMain.handle('get-all-matches', async (event, args) => {
+  try {
+    let matches = [];
+    for (let i = 1; i <= args.currentRound; i++) {
+      let roundMatches = await allQuery(`SELECT * FROM matches WHERE tournamentId = ? AND round = ?`, [args.tournamentId, i])
+      matches.push(roundMatches.sort((a, b) => a.boardNumber - b.boardNumber));
+    }
+    console.log(matches)
+    return matches;
   } catch (err) {
     console.error(err);
   }

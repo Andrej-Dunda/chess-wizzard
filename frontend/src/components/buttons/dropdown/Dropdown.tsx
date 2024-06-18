@@ -9,9 +9,10 @@ type DropdownProps = {
   setSelectedItem: React.Dispatch<React.SetStateAction<string>>;
   className?: string;
   label?: string;
+  prefix?: string;
 }
 
-const Dropdown = ({ dropdownItems, selectedItem, setSelectedItem, className, label }: DropdownProps) => {
+const Dropdown = ({ dropdownItems, selectedItem, setSelectedItem, className, label, prefix }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const buttonRef = useRef<HTMLButtonElement>(null);
   const itemsRef = useRef<HTMLDivElement>(null);
@@ -46,7 +47,7 @@ const Dropdown = ({ dropdownItems, selectedItem, setSelectedItem, className, lab
     <div className='dropdown'>
       {label && <span className='label'>{label}</span>}
       <button className={`dropdown-button ${className}`} onClick={() => setIsOpen(!isOpen)} ref={buttonRef}>
-        <span className='selected-item-label'>{selectedItem}</span>
+        <span className='selected-item-label'>{prefix ? prefix + ' ' + selectedItem : selectedItem}</span>
         <FontAwesomeIcon icon={isOpen ? faChevronUp : faChevronDown} color={grayscale900} />
       </button>
       <div className={`dropdown-items-wrapper ${isOpen ? 'open' : ''}`} ref={itemsRef}>
@@ -54,7 +55,7 @@ const Dropdown = ({ dropdownItems, selectedItem, setSelectedItem, className, lab
           {dropdownItems.map((item, index) => {
             return (
               <div key={index} className="dropdown-item" onClick={() => handleItemClick(item)}>
-                {item}
+                {prefix ? prefix + ' ' + item : item}
               </div>
             )
           })}
