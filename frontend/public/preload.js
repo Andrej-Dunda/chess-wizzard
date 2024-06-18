@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('api', {
   getTournament: (args) => ipcRenderer.invoke('get-tournament', args),
   getMatches: (args) => ipcRenderer.invoke('get-matches', args),
   getAllMatches: (args) => ipcRenderer.invoke('get-all-matches', args),
+  nextTournamentRound: (args) => ipcRenderer.invoke('next-tournament-round', args),
   // Send Methods
   createTournament: (args) => ipcRenderer.send('create-tournament', args),
   deleteTournament: (args) => ipcRenderer.send('delete-tournament', args),
@@ -16,7 +17,6 @@ contextBridge.exposeInMainWorld('api', {
   changeTournamentPhase: (args) => ipcRenderer.send('change-tournament-phase', args),
   saveMatches: (args) => ipcRenderer.send('save-matches', args),
   saveResult: (args) => ipcRenderer.send('save-result', args),
-  nextTournamentRound: (args) => ipcRenderer.send('next-tournament-round', args),
   previousTournamentRound: (args) => ipcRenderer.send('previous-tournament-round', args),
   // Receive Methods
   // testReceive: (callback) => ipcRenderer.on('test-receive', (event, data) => { callback(data); })

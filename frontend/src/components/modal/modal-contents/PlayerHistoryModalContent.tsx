@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useTournaments } from '../../../contexts/TournamentsProvider';
 import { iTournamentPlayer } from '../../../interfaces/tournaments-interface'
 import PlayerNameComponent from '../../player-name-component/PlayerNameComponent';
@@ -12,10 +11,6 @@ const PlayerHistoryModalContent = ({ player }: { player: iTournamentPlayer }) =>
     });
     return match;
   }).sort((a, b) => (a?.round || 0) - (b?.round || 0));
-
-  useEffect(() => {
-    console.log(player)
-  }, [player])
 
   return (
     <div className='player-history-modal-content'>

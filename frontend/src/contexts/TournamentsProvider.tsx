@@ -34,7 +34,7 @@ type TournamentsContextType = {
   isAnyResultNull: boolean;
   getMatches: () => void;
 
-  formatNumber: (num: number) => string;
+  formatNumber: (num: number) => string | number;
 };
 
 export const TournamentsContext = createContext<TournamentsContextType | null>(null);
@@ -72,6 +72,13 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTournament]);
+
+  useEffect(() => {
+    if (selectedTournament) {
+      getMatches();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTournament?.currentRound]);
 
   const getTournaments = async () => {
     const tournamentsData = await window.api.getTournaments();
@@ -113,20 +120,21 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     if (!selectedTournament) return
 
     setSelectedMatchIndex(undefined)
-    setMatches([])
+    // setMatches([])
 
     if (round === 'next') {
-      await window.api.nextTournamentRound({ tournamentId: selectedTournament.id })
+      const { matches, tournament, players } = await window.api.nextTournamentRound({ tournamentId: selectedTournament.id })
+      setMatches(matches)
+      setTournamentPlayers(parsePlayers(players))
+      setSelectedTournament(tournament)
     } else if (round === 'previous') {
       await window.api.previousTournamentRound({ tournamentId: selectedTournament.id })
+      getTournament(selectedTournament.id)
     }
-    getTournament(selectedTournament.id)
     getAllMatches()
   }
 
-  const getTournamentPlayers = async () => {
-    if (!selectedTournament) return
-    const players: iRawTournamentPlayer[] = await window.api.getPlayers({ tournamentId: selectedTournament.id });
+  const parsePlayers = (players: iRawTournamentPlayer[]) => {
     const parsedPlayers = players.map((player: iRawTournamentPlayer) => {
       return {
         ...player,
@@ -145,7 +153,13 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
         return a.startPosition - b.startPosition;
       }
     });
-    setTournamentPlayers(sortedPlayers);
+    return sortedPlayers;
+  }
+
+  const getTournamentPlayers = async () => {
+    if (!selectedTournament) return
+    const players: iRawTournamentPlayer[] = await window.api.getPlayers({ tournamentId: selectedTournament.id });
+    setTournamentPlayers(parsePlayers(players));
   }
 
   const addTournamentPlayer = async (newPlayerName: string) => {
@@ -172,7 +186,6 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
 
   const getMatches = async () => {
     if (selectedTournament) {
-      console.log(selectedTournament.currentRound)
       const matchesData = await window.api.getMatches({ tournamentId: selectedTournament.id, currentRound: selectedTournament.currentRound })
       const parsedMatches: iMatch[] = matchesData.map((match: iRawMatch) => {
         return {
@@ -191,7 +204,6 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   const getAllMatches = async () => {
     if (selectedTournament) {
       const matchesData = await window.api.getAllMatches({ tournamentId: selectedTournament.id, currentRound: selectedTournament.currentRound })
-      console.log(matchesData)
       const parsedMatches: iMatch[][] = matchesData.map((roundMatches: iRawMatch[]) => {
         return roundMatches.map((match: iRawMatch) => {
           return {
@@ -215,7 +227,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
     if (decimalPart === 0.5) {
       return `${integerPart}½`;
     } else {
-      return num.toString();
+      return num;
     }
   }
 

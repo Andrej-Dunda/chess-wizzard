@@ -161,9 +161,7 @@ const updatePlayerStats = async (tournamentId, round) => {
 }
 
 const revertPlayerStats = async (tournamentId, round) => {
-  console.log({ tournamentId: tournamentId, round: round })
   const matches = await allQuery(`SELECT * FROM matches WHERE round = ? AND tournamentId = ?`, [round, tournamentId]);
-  console.log('matches: ', matches)
 
   matches.forEach((match) => {
     const revertedWhitePlayer = JSON.parse(match.whitePlayer);
@@ -294,13 +292,13 @@ const generateNextRoundMatches = async (tournamentId, currentRound) => {
   // console.log(matches.map(match => [{name: match[0].name, score: match[0].score}, {name: match[1].name, score: match[1].score}]));
   // console.log(subgroups.map(subgroup => `Index: ${subgroups.indexOf(subgroup)}, Length: ${subgroup.length}, Score value: ${subgroup[0].score}`));
 
-  matches.forEach(async (match, index) => {
+  for (const [index, match] of matches.entries()) {
     if (match[1] === 'Volno') {
       await saveMatch({ whitePlayer: match[0], blackPlayer: { name: 'Volno', score: 0 }, boardNumber: index + 1, currentRound: currentRound });
     } else {
       await saveMatch({ whitePlayer: match[0], blackPlayer: match[1], boardNumber: index + 1, currentRound: currentRound });
     }
-  });
+  }
 }
 
 // IPC communication
@@ -373,7 +371,7 @@ ipcMain.on('change-tournament-phase', async (event, args) => {
 });
 
 // Next tournament round
-ipcMain.on('next-tournament-round', async (event, args) => {
+ipcMain.handle('next-tournament-round', async (event, args) => {
   try {
     await runQuery('UPDATE tournaments SET currentRound = currentRound + 1 WHERE id = ?', [args.tournamentId]);
     const { currentRound } = await getQuery('SELECT currentRound FROM tournaments WHERE id = ?', [args.tournamentId]);
@@ -385,8 +383,13 @@ ipcMain.on('next-tournament-round', async (event, args) => {
       await updatePlayerStats(args.tournamentId, currentRound - 1);
       console.log('Player stats updated')
     }
-    generateNextRoundMatches(args.tournamentId, currentRound);
+    await generateNextRoundMatches(args.tournamentId, currentRound);
     console.log('Matches generated')
+    const matches = await allQuery('SELECT * FROM matches WHERE tournamentId = ? AND round = ?', [args.tournamentId, currentRound]);
+    const tournament = await getQuery('SELECT * FROM tournaments WHERE id = ?', [args.tournamentId]);
+    const players = await allQuery('SELECT * FROM players WHERE tournamentId = ?', [args.tournamentId]);
+
+    return { matches, tournament, players };
   } catch (err) {
     console.error(err);
   }
@@ -414,9 +417,6 @@ ipcMain.handle('get-players', async (event, args) => {
     console.error(err);
   }
 });
-
-// Random integer min max
-const randomInt = (min, max) => Math.floor(2 * Math.random() * (max - min + 1) + min) / 2;
 
 // Add player
 ipcMain.on('add-player', async (event, args) => {
@@ -456,7 +456,6 @@ ipcMain.handle('get-all-matches', async (event, args) => {
       let roundMatches = await allQuery(`SELECT * FROM matches WHERE tournamentId = ? AND round = ?`, [args.tournamentId, i])
       matches.push(roundMatches.sort((a, b) => a.boardNumber - b.boardNumber));
     }
-    console.log(matches)
     return matches;
   } catch (err) {
     console.error(err);
