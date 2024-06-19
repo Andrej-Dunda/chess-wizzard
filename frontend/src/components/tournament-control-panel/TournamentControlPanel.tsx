@@ -3,14 +3,38 @@ import './TournamentControlPanel.scss'
 import React from 'react'
 import { faAnglesLeft, faAnglesRight, faFlagCheckered } from '@fortawesome/free-solid-svg-icons'
 import { useTournaments } from '../../contexts/TournamentsProvider'
+import ModalFooter from '../modal/modal-footer/ModalFooter'
+import { useModal } from '../../contexts/ModalProvider'
 
 const TournamentControlPanel = () => {
   const { changeTournamentPhase, selectedTournament, changeTournamentRound, isAnyResultNull } = useTournaments();
+  const { showModal, closeModal } = useModal();
   const firstRound: boolean = selectedTournament?.currentRound === 1;
   
   const backToRegistration = async () => {
     await changeTournamentPhase('registration')
     await changeTournamentRound('previous')
+  }
+
+  const previousRound = async () => {
+    showModal(<PreviousRoundModalContent />)
+  }
+
+  const PreviousRoundModalContent = () => {
+    return (
+      <div className="previous-round-modal-content">
+        <h3>Chcete se opravdu vrátit o kolo zpět?</h3>
+        <span>Zadané výsledky z tohoto kola budou zahozeny!</span>
+        <ModalFooter
+          onSubmit={() => {
+            changeTournamentRound('previous')
+            closeModal()
+          }}
+          submitButtonLabel='Vrátit se o kolo zpět'
+          cancelButtonLabel='Zrušit'
+        />
+      </div>
+    )
   }
 
   return (
@@ -21,7 +45,7 @@ const TournamentControlPanel = () => {
           Zpět k registraci
         </button>
         : (
-          <button className="previous-round-button dark" onClick={() => changeTournamentRound('previous')}>
+          <button className="previous-round-button dark" onClick={previousRound}>
             <FontAwesomeIcon icon={faAnglesLeft} />
             Zpět k předchozímu kolu
           </button>

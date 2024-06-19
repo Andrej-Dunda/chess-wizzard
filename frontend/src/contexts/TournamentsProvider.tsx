@@ -132,8 +132,8 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
       setTournamentPlayers(parsePlayers(players))
       setSelectedTournament(tournament)
     } else if (round === 'previous') {
-      await window.api.previousTournamentRound({ tournamentId: selectedTournament.id })
-      getTournament(selectedTournament.id)
+      await window.api.previousTournamentRound({ tournamentId: selectedTournament?.id })
+      selectedTournament && getTournament(selectedTournament.id)
     }
     getAllMatches()
   }
