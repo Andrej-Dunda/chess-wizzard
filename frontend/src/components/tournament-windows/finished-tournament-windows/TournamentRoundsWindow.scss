@@ -3,12 +3,25 @@
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  padding: 16px;
 
   .round-switch {
     display: flex;
     gap: 16px;
     align-items: center;
+
+    h4 {
+      user-select: none;
+    }
+
+    .toggle {
+      height: 24px;
+      cursor: pointer;
+
+      &.disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+    }
   }
 
   .rounds-wrapper {

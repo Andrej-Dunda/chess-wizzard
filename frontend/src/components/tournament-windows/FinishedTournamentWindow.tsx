@@ -22,9 +22,11 @@ const FinishedTournamentWindow = () => {
         </div>
         <FontAwesomeIcon className='home-button' onClick={toHome} icon={faHome} />
       </div>
-      {
-        showResults ? <FinalResultsWindow /> : <TournamentRoundsWindow />
-      }
+      <div className="finished-tournament-body">
+        {
+          showResults ? <FinalResultsWindow /> : <TournamentRoundsWindow />
+        }
+      </div>
     </div>
   )
 }

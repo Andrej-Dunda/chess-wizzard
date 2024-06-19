@@ -2,31 +2,44 @@ import { useTournaments } from '../../../contexts/TournamentsProvider';
 import { iMatch } from '../../../interfaces/tournaments-interface';
 import './TournamentRoundsWindow.scss'
 import React, { useEffect, useState } from 'react'
-import Dropdown from '../../buttons/dropdown/Dropdown';
 import PlayerNameComponent from '../../player-name-component/PlayerNameComponent';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleLeft, faAngleRight } from '@fortawesome/free-solid-svg-icons';
 
 const TournamentRoundsWindow = () => {
   const { setSelectedMatchIndex, selectedTournament, allTournamentMatches, formatNumber } = useTournaments();
-  const [selectedRound, setSelectedRound] = useState<string>('1');
+  const [selectedRound, setSelectedRound] = useState<number>(1);
   const [selectedRoundMatches, setSelectedRoundMatches] = useState<iMatch[]>([]);
 
   useEffect(() => {
     if (allTournamentMatches.length > 0) {
-      setSelectedRoundMatches(allTournamentMatches[parseInt(selectedRound) - 1]);
+      setSelectedRoundMatches(allTournamentMatches[selectedRound - 1]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allTournamentMatches])
 
   useEffect(() => {
     if (allTournamentMatches.length > 0) {
-      setSelectedRoundMatches(allTournamentMatches[parseInt(selectedRound) - 1]);
+      setSelectedRoundMatches(allTournamentMatches[selectedRound - 1]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRound])
 
+  const showRound = (direction: string) => {
+    if (direction === 'previous') {
+      setSelectedRound(selectedRound - 1);
+    } else {
+      setSelectedRound(selectedRound + 1);
+    }
+  }
+
   return (
     <div className='tournament-rounds-window'>
-      <Dropdown dropdownItems={Array.from({ length: selectedTournament ? selectedTournament.currentRound : 1 }, (_, index) => (index + 1).toString())} selectedItem={selectedRound} setSelectedItem={setSelectedRound} prefix='Kolo' />
+      <div className="round-switch">
+        <FontAwesomeIcon icon={faAngleLeft} className={`${selectedRound === 1 ? 'disabled ' : ''}previous-round-icon toggle`} onClick={() => selectedRound > 1 && showRound('previous')} />
+        <h4>Kolo {selectedRound}</h4>
+        <FontAwesomeIcon icon={faAngleRight} className={`${selectedRound === selectedTournament?.currentRound ? 'disabled ' : ''}next-round-icon toggle`} onClick={() => selectedTournament && selectedRound < selectedTournament.currentRound && showRound('next')} />
+      </div>
       <div className="rounds-wrapper">
         <div className='tournament-round'>
           <div className="matches-wrapper">
