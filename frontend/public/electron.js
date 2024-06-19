@@ -18,6 +18,7 @@ const createWindow = () => {
       worldSafeExecuteJavaScript: true, // If you're using Electron 12+, this should be enabled by default and does not need to be added here.
       contextIsolation: true, // Isolating context so our app is not exposed to random javascript executions making it safer.
     },
+    icon: path.join(app.getAppPath(), './assets/icon.png') // Set the path to your icon file here
   });
 
   // Loading a webpage inside the electron window we just created
