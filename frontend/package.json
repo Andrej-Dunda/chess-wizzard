@@ -37,6 +37,7 @@
     "dev": "concurrently \"npm run start-react\" \"wait-on http://localhost:3000 && npm run start-electron\"",
     "postinstall": "electron-builder install-app-deps",
     "pack-app": "npm run build-react && electron-builder --dir -mwl",
+    "pack-windows": "npm run build-react && electron-builder --win",
     "pack-build": "electron-builder --dir",
     "build": "npm run build-react && electron-builder",
     "test": "react-scripts test",

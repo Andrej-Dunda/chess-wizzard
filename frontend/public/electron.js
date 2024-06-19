@@ -30,9 +30,9 @@ const createWindow = () => {
 
   // In development mode, if the window has loaded, then load the dev tools.
   // if (isDev) {
-  mainWindow.webContents.on('did-frame-finish-load', () => {
-    mainWindow.webContents.openDevTools({ mode: 'detach' });
-  });
+  // mainWindow.webContents.on('did-frame-finish-load', () => {
+  //   mainWindow.webContents.openDevTools({ mode: 'detach' });
+  // });
   // }
 };
 
@@ -43,14 +43,14 @@ app.whenReady().then(async () => {
   await createWindow(); // Create the mainWindow
 
   // If you want to add React Dev Tools
-  if (isDev) {
-    await session.defaultSession
-      .loadExtension(
-        path.join(__dirname, `../userdata/extensions/react-dev-tools`) // This folder should have the chrome extension for React Dev Tools. Get it online or from your Chrome extensions folder.
-      )
-      .then((name) => console.log('Dev Tools Loaded'))
-      .catch((err) => console.log(err));
-  }
+  // if (isDev) {
+  //   await session.defaultSession
+  //     .loadExtension(
+  //       path.join(__dirname, `../userdata/extensions/react-dev-tools`) // This folder should have the chrome extension for React Dev Tools. Get it online or from your Chrome extensions folder.
+  //     )
+  //     .then((name) => console.log('Dev Tools Loaded'))
+  //     .catch((err) => console.log(err));
+  // }
 });
 
 // Exiting the app
