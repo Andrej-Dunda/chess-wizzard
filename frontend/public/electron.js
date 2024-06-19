@@ -172,8 +172,6 @@ const revertPlayerStats = async (tournamentId, round) => {
   });
 }
 
-// Matchmaking
-
 // Save matches
 const saveMatch = async (args) => {
   try {
@@ -220,86 +218,149 @@ const getSortedPlayers = async (tournamentId) => {
   return sortedPlayers;
 }
 
-// // Check if two players already played against each other
-// const playersPlayed = (player, opponent) => {
-//   return player.opponentIdSequence.includes(opponent.id);
-// }
+// Swiss system matchmaking
 
-// // Check if a player played with the same color in the last two rounds and his opponent played with the same color in the last two rounds
-// const sameColorInLastTwoRounds = (player, opponent) => {
-//   return player.colorSequence[player.colorSequence.length - 1] === opponent.colorSequence[opponent.colorSequence.length - 1] && player.colorSequence[player.colorSequence.length - 2] === opponent.colorSequence[opponent.colorSequence.length - 2] && player.colorSequence[player.colorSequence.length - 1] === player.colorSequence[player.colorSequence.length - 2];
-// }
+const _createMatchMatrix = (playerList, currentRound) => {
+  const pointMatrix = [];
+  for (let index = 0; index < playerList.length; index++) {
+    const pointList = [];
+    for (let index2 = 0; index2 < index; index2++) {
+      const playerOne = playerList[index];
+      const pointOne = playerOne ? playerOne.score : -1;
+      const playerTwo = playerList[index2];
+      const pointTwo = playerTwo ? playerTwo.score : -1;
+      let badnessPoint = 0;
+      badnessPoint += playerOne.opponentIdSequence.filter((opponentId) => opponentId === playerTwo.id).length * 1000;
+      badnessPoint += (pointOne - pointTwo) ** 2;
+      badnessPoint += (index - index2) / 1000;
+      badnessPoint -= currentRound === 1 ? Math.abs(playerOne.startPosition - playerTwo.startPosition) : 0;
 
-// Divide players into subgroups based on their score
-const dividePlayersIntoSubgroups = (tournamentPlayers) => {
-  let groups = tournamentPlayers.reduce((groups, player) => {
-    if (!groups[player.score]) {
-      groups[player.score] = [];
+      // Penalty for not alternating colors or playing the same color more than 3 times in a row
+      const colorPenalty = (player, otherPlayer) => {
+        const playerColorSequence = player.colorSequence;
+        const otherPlayerColorSequence = otherPlayer.colorSequence;
+        let penalty = 0;
+
+        // Check if the player has played the same color in the last match
+        if (playerColorSequence.length > 0 && playerColorSequence[playerColorSequence.length - 1] === otherPlayerColorSequence[otherPlayerColorSequence.length - 1]) {
+          penalty += 1 * currentRound; // Penalize for not alternating colors
+
+          if (playerColorSequence.length > 1 && playerColorSequence[playerColorSequence.length - 2] === otherPlayerColorSequence[otherPlayerColorSequence.length - 2] && playerColorSequence[playerColorSequence.length - 2] === playerColorSequence[playerColorSequence.length - 1]) {
+            penalty += 5 * currentRound; // Penalize for playing the same color twice in a row
+
+            if (playerColorSequence.length > 2 && playerColorSequence[playerColorSequence.length - 3] === otherPlayerColorSequence[otherPlayerColorSequence.length - 3] && playerColorSequence[playerColorSequence.length - 3] === playerColorSequence[playerColorSequence.length - 1]) {
+              penalty += 10 * currentRound; // Penalize for playing the same color three times in a row
+            }
+          }
+        }
+
+        return penalty;
+      };
+
+      // Apply color penalties
+      badnessPoint += colorPenalty(playerOne, playerTwo);
+
+      pointList.push(badnessPoint);
     }
-    groups[player.score].push(player);
-    return groups;
-  }, {});
+    pointMatrix.push(pointList);
+  }
+  return pointMatrix;
+};
 
-  // Sort the keys in descending order, convert them to numbers, and map them to their corresponding groups
-  let subgroups = Object.keys(groups).sort((a, b) => b - a).map(score => groups[score]);
-
-  // Sort players within each subgroup
-  subgroups = subgroups.map(subgroup => sortPlayers(subgroup));
-
-  return subgroups;
-}
+const _findAllPairings = (playerList, pointMatrix, ignore, _players) => {
+  if (playerList.length <= 2) {
+    if (playerList.length !== 2) throw new Error("Even numbered players should be handled elsewhere.");
+    const origIndexOne = _players.indexOf(playerList[0]);
+    const origIndexTwo = _players.indexOf(playerList[1]);
+    const point = pointMatrix[origIndexTwo][origIndexOne];
+    return [{ "list": [playerList], "points": point }];
+  }
+  let comboList = [];
+  for (let index = 1; index < playerList.length; index++) {
+    const origIndexOne = _players.indexOf(playerList[0]);
+    const origIndexTwo = _players.indexOf(playerList[index]);
+    const point = pointMatrix[origIndexTwo][origIndexOne];
+    if (point > ignore && index > 1) continue;
+    let copyList = [...playerList]; // Duplicate the array
+    let firstPair = [];
+    let newComboList = [];
+    firstPair.push(copyList.shift()); // Remove the first element and add it to the firstPair
+    firstPair.push(copyList.splice(index - 1, 1)[0]); // Remove the element at the adjusted index and add it to the firstPair
+    _findAllPairings(copyList, pointMatrix, ignore, _players).forEach(generatedComboList => {
+      let newElement = {};
+      newElement["list"] = [firstPair, ...generatedComboList["list"]];
+      newElement["points"] = point + generatedComboList["points"];
+      newComboList.push(newElement);
+    });
+    comboList = comboList.concat(newComboList);
+  }
+  return comboList;
+};
 
 const generateNextRoundMatches = async (tournamentId, currentRound) => {
-  let tournamentPlayers = await getSortedPlayers(tournamentId);
-  let matches = [];
+  try {
+    const players = await getSortedPlayers(tournamentId); // Assuming this function fetches and sorts players based on their scores and other criteria
+    const pointMatrix = _createMatchMatrix(players, currentRound);
+    const ignoreThreshold = 1000; // Threshold to ignore matchups with too high "badness" scores, adjust as needed
+    const allPossiblePairings = _findAllPairings(players, pointMatrix, ignoreThreshold, players);
 
-  let subgroups = dividePlayersIntoSubgroups(tournamentPlayers);
-
-  for (let i = 0; i < subgroups.length; i++) {
-    let subgroup = subgroups[i];
-
-    let half = Math.floor(subgroup.length / 2);
-    let firstHalf = subgroup.slice(0, half);
-    let secondHalf = subgroup.slice(half);
-
-    // console.log('firstHalf', firstHalf);
-    // console.log('secondHalf', secondHalf);
-
-    // Prioritize finding a match for a player who was floated into the subgroup
-    let floatedPlayerIndex = firstHalf.findIndex(player => player.floated);
-    if (floatedPlayerIndex !== -1) {
-      let floatedPlayer = firstHalf.splice(floatedPlayerIndex, 1)[0];
-      matches.push([secondHalf[0], floatedPlayer]);
-      secondHalf = secondHalf.slice(1);
+    if (allPossiblePairings.length === 0) {
+      throw new Error("No valid pairings found.");
     }
 
-    // Match players at corresponding indexes
-    for (let j = 0; j < firstHalf.length; j++) {
-      matches.push([firstHalf[j], secondHalf[j]]);
-    }
+    // Select the pairing with the lowest total "badness" score
+    const bestPairing = allPossiblePairings.reduce((best, current) => {
+      return current.points < best.points ? current : best;
+    });
 
-    // If the subgroup has an odd number of players, move the last player to the next subgroup
-    if (subgroup.length % 2 !== 0 && subgroups[i + 1]) {
-      let floatedPlayer = subgroup.pop();
-      floatedPlayer.floated = true;
-      subgroups[i + 1].unshift(floatedPlayer);
-    } else if (subgroup.length % 2 !== 0 && !subgroups[i + 1]) {
-      let floatedPlayer = subgroup.pop();
-      matches.push([floatedPlayer, 'Volno']);
-    }
+    console.log("Best pairing:", bestPairing.list);
+    await Promise.all(bestPairing.list.map(async (pair, index) => {
+      // Function to find the most recent round with different colors
+      const findMostRecentDifferentColorRound = (player1, player2) => {
+        const minLength = Math.min(player1.colorSequence.length, player2.colorSequence.length);
+        for (let i = 1; i <= minLength; i++) {
+          const color1 = player1.colorSequence[player1.colorSequence.length - i];
+          const color2 = player2.colorSequence[player2.colorSequence.length - i];
+          if (color1 !== color2) return {color1, color2};
+        }
+        return null;
+      };
+    
+      // Retrieve the most recent round where the players had different colors
+      const recentDifferentRound = findMostRecentDifferentColorRound(pair[0], pair[1]);
+    
+      let whitePlayer, blackPlayer;
+      if (recentDifferentRound) {
+        // If found, swap colors based on the most recent different round
+        whitePlayer = recentDifferentRound.color1 === 'black' ? pair[0] : pair[1];
+        blackPlayer = recentDifferentRound.color1 === 'black' ? pair[1] : pair[0];
+      } else {
+        // If not found or all rounds had the same colors, use the existing logic
+        const lastColorPlayer1 = pair[0].colorSequence.length > 0 ? pair[0].colorSequence[pair[0].colorSequence.length - 1] : 'white';
+        const lastColorPlayer2 = pair[1].colorSequence.length > 0 ? pair[1].colorSequence[pair[1].colorSequence.length - 1] : 'white';
+    
+        if (lastColorPlayer1 !== lastColorPlayer2) {
+          whitePlayer = lastColorPlayer1 === 'black' ? pair[0] : pair[1];
+          blackPlayer = lastColorPlayer1 === 'black' ? pair[1] : pair[0];
+        } else {
+          whitePlayer = index % 2 === 0 ? pair[0] : pair[1];
+          blackPlayer = index % 2 === 0 ? pair[1] : pair[0];
+        }
+      }
+    
+      // Save the match with the determined color assignment
+      return saveMatch({
+        whitePlayer: whitePlayer,
+        blackPlayer: blackPlayer,
+        boardNumber: index + 1,
+        currentRound: currentRound
+      });
+    }));
+
+  } catch (error) {
+    console.error("Error creating Swiss pairings:", error);
   }
-
-  // console.log(matches.map(match => [{name: match[0].name, score: match[0].score}, {name: match[1].name, score: match[1].score}]));
-  // console.log(subgroups.map(subgroup => `Index: ${subgroups.indexOf(subgroup)}, Length: ${subgroup.length}, Score value: ${subgroup[0].score}`));
-
-  for (const [index, match] of matches.entries()) {
-    if (match[1] === 'Volno') {
-      await saveMatch({ whitePlayer: match[0], blackPlayer: { name: 'Volno', score: 0 }, boardNumber: index + 1, currentRound: currentRound });
-    } else {
-      await saveMatch({ whitePlayer: match[0], blackPlayer: match[1], boardNumber: index + 1, currentRound: currentRound });
-    }
-  }
-}
+};
 
 // IPC communication
 

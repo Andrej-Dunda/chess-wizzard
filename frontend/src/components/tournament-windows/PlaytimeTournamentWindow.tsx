@@ -10,7 +10,7 @@ import TournamentRoundsWindow from './finished-tournament-windows/TournamentRoun
 
 const PlaytimeTournamentWindow = () => {
   const { selectedTournament, getMatches } = useTournaments();
-  const [openWindow, setOpenWindow] = useState<string>('results');
+  const [openWindow, setOpenWindow] = useState<string>('matches');
   const firstRound: boolean = selectedTournament?.currentRound === 1;
   const { toHome } = useNav();
 
@@ -24,8 +24,8 @@ const PlaytimeTournamentWindow = () => {
       <div className="tournament-window-header">
         <h5 className="tournament-title">{selectedTournament?.name}</h5>
         <div className="results-toggle">
-          <button className={`show-results-button toggle-button dark${openWindow === 'results' ? ' active' : ''}`} onClick={() => openWindow !== 'results' && setOpenWindow('results')}>{firstRound ? 'Startovní listina' : 'Výsledky'}</button>
           <button className={`show-matches-button toggle-button dark${openWindow === 'matches' ? ' active' : ''}`} onClick={() => openWindow !== 'matches' && setOpenWindow('matches')}>Nasazení</button>
+          <button className={`show-results-button toggle-button dark${openWindow === 'results' ? ' active' : ''}`} onClick={() => openWindow !== 'results' && setOpenWindow('results')}>{firstRound ? 'Startovní listina' : 'Výsledky'}</button>
           <button className={`show-previous-rounds-button toggle-button dark${openWindow === 'previous-rounds' ? ' active' : ''}`} onClick={() => openWindow !== 'previous-rounds' && setOpenWindow('previous-rounds')}>Předchozí kola</button>
         </div>
         <FontAwesomeIcon className='home-button' onClick={toHome} icon={faHome} />

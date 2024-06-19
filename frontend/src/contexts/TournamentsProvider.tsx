@@ -80,6 +80,10 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTournament?.currentRound]);
 
+  // useEffect(() => {
+  //   console.log(matches.map(match => [match.whitePlayer.colorSequence, match.blackPlayer.colorSequence]))
+  // }, [matches])
+
   const getTournaments = async () => {
     const tournamentsData = await window.api.getTournaments();
     tournamentsData && setTournaments(tournamentsData)
@@ -217,6 +221,7 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
         }).sort((a, b) => a.boardNumber - b.boardNumber)
       })
       setAllTournamentMatches(parsedMatches);
+      console.log(parsedMatches.map(roundMatches => roundMatches.map(match => [match.result])))
     }
   }
 
