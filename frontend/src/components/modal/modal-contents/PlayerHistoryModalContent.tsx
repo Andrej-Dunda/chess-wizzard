@@ -58,7 +58,7 @@ const PlayerHistoryModalContent = ({ player }: { player: iTournamentPlayer }) =>
                   <td className='opponent-name'>{match && match.whitePlayer.id === player.id ? <PlayerNameComponent playerId={match.blackPlayer.id} /> : match && <PlayerNameComponent playerId={match.whitePlayer.id} />}</td>
                   <td className='width-s'>
                     {
-                      !match?.result ? '-' : match?.result === 0.5 ? '½'
+                      match?.result === null ? '-' : match?.result === 0.5 ? '½'
                       : match?.whitePlayer.id === player.id ? match?.result === 1 ? '1' : '0'
                       : match?.result === 1 ? '0' : '1'
                     }

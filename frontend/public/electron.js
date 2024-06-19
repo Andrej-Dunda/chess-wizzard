@@ -111,7 +111,8 @@ const updatePlayerStats = async (tournamentId, round) => {
   const players = await allQuery(`SELECT * FROM players WHERE tournamentId = ?`, [tournamentId]);
   const matches = await allQuery(`SELECT * FROM matches WHERE tournamentId = ? AND round = ?`, [tournamentId, round]);
 
-  matches.forEach((match) => {
+  for (const match of matches) {
+    console.log('updating PlayerStats')
     if (JSON.parse(match.blackPlayer).name === 'Volno') {
       const whitePlayer = players.find((player) => player.id === JSON.parse(match.whitePlayer).id);
       whitePlayer.score += 1;
@@ -123,8 +124,8 @@ const updatePlayerStats = async (tournamentId, round) => {
       let whitePlayerColorSequence = JSON.parse(whitePlayer.colorSequence);
       whitePlayerColorSequence.push('bye');
       whitePlayer.colorSequence = JSON.stringify(whitePlayerColorSequence);
-      runQuery(`UPDATE players SET score = ?, opponentIdSequence = ?, colorSequence = ? WHERE id = ?`, [whitePlayer.score, whitePlayer.opponentIdSequence, whitePlayer.colorSequence, whitePlayer.id]);
-      return;
+      await runQuery(`UPDATE players SET score = ?, opponentIdSequence = ?, colorSequence = ? WHERE id = ?`, [whitePlayer.score, whitePlayer.opponentIdSequence, whitePlayer.colorSequence, whitePlayer.id]);
+      continue;
     }
 
     const whitePlayer = players.find((player) => player.id === JSON.parse(match.whitePlayer).id);
@@ -155,10 +156,13 @@ const updatePlayerStats = async (tournamentId, round) => {
     blackPlayerColorSequence.push('black');
     blackPlayer.colorSequence = JSON.stringify(blackPlayerColorSequence);
 
-    runQuery(`UPDATE players SET score = ?, bucholz = ?, sonnenbornBerger = ?, opponentIdSequence = ?, colorSequence = ? WHERE id = ?`, [whitePlayer.score, whitePlayer.bucholz, whitePlayer.sonnenbornBerger, whitePlayer.opponentIdSequence, whitePlayer.colorSequence, whitePlayer.id]);
-    runQuery(`UPDATE players SET score = ?, bucholz = ?, sonnenbornBerger = ?, opponentIdSequence = ?, colorSequence = ? WHERE id = ?`, [blackPlayer.score, blackPlayer.bucholz, blackPlayer.sonnenbornBerger, blackPlayer.opponentIdSequence, blackPlayer.colorSequence, blackPlayer.id]);
-  });
+    await runQuery(`UPDATE players SET score = ?, bucholz = ?, sonnenbornBerger = ?, opponentIdSequence = ?, colorSequence = ? WHERE id = ?`, [whitePlayer.score, whitePlayer.bucholz, whitePlayer.sonnenbornBerger, whitePlayer.opponentIdSequence, whitePlayer.colorSequence, whitePlayer.id]);
+    await runQuery(`UPDATE players SET score = ?, bucholz = ?, sonnenbornBerger = ?, opponentIdSequence = ?, colorSequence = ? WHERE id = ?`, [blackPlayer.score, blackPlayer.bucholz, blackPlayer.sonnenbornBerger, blackPlayer.opponentIdSequence, blackPlayer.colorSequence, blackPlayer.id]);
+    console.log([whitePlayer.score, whitePlayer.bucholz, whitePlayer.sonnenbornBerger, whitePlayer.opponentIdSequence, whitePlayer.colorSequence, whitePlayer.id])
+    console.log([blackPlayer.score, blackPlayer.bucholz, blackPlayer.sonnenbornBerger, blackPlayer.opponentIdSequence, blackPlayer.colorSequence, blackPlayer.id])
+  }
 }
+
 
 const revertPlayerStats = async (tournamentId, round) => {
   const matches = await allQuery(`SELECT * FROM matches WHERE round = ? AND tournamentId = ?`, [round, tournamentId]);
@@ -177,11 +181,11 @@ const saveMatch = async (args) => {
   try {
     if (args.blackPlayer.name === 'Volno') {
       await runQuery(`INSERT INTO matches (tournamentId, whitePlayer, blackPlayer, boardNumber, round, result) VALUES (?, ?, ?, ?, ?, ?)`, [args.whitePlayer.tournamentId, JSON.stringify(args.whitePlayer), JSON.stringify(args.blackPlayer), args.boardNumber, args.currentRound, 1]);
-      console.log('Match saved');
+      // console.log([args.whitePlayer.tournamentId, JSON.stringify(args.whitePlayer), JSON.stringify(args.blackPlayer), args.boardNumber, args.currentRound, 1]);
       return;
     }
     await runQuery(`INSERT INTO matches (tournamentId, whitePlayer, blackPlayer, boardNumber, round) VALUES (?, ?, ?, ?, ?)`, [args.whitePlayer.tournamentId, JSON.stringify(args.whitePlayer), JSON.stringify(args.blackPlayer), args.boardNumber, args.currentRound]);
-    console.log('Match saved');
+    // console.log([args.whitePlayer.tournamentId, JSON.stringify(args.whitePlayer), JSON.stringify(args.blackPlayer), args.boardNumber, args.currentRound]);
   } catch (err) {
     console.log(err);
   }
@@ -258,7 +262,7 @@ const _createMatchMatrix = (playerList, currentRound) => {
       };
 
       // Apply color penalties
-      badnessPoint += colorPenalty(playerOne, playerTwo);
+      badnessPoint += currentRound > 2 ? colorPenalty(playerOne, playerTwo) : 0;
 
       pointList.push(badnessPoint);
     }
@@ -268,31 +272,47 @@ const _createMatchMatrix = (playerList, currentRound) => {
 };
 
 const _findAllPairings = (playerList, pointMatrix, ignore, _players) => {
+  let byePairing = null;
+
+  // Correct variable name from playersList to playerList
+  if (playerList.length % 2 !== 0) {
+    const playerWithoutFreeRound = [...playerList].reverse().find(player => !player.opponentIdSequence.includes(0));
+    if (playerWithoutFreeRound) {
+      const playerIndex = playerList.indexOf(playerWithoutFreeRound);
+      // Remove the player with a bye from the list
+      const freeRoundPlayer = playerList.splice(playerIndex, 1)[0];
+      // Create a bye pairing for the free round player with 'Volno' as the imaginary opponent
+      byePairing = { "list": [[freeRoundPlayer, {id: 0, name: 'Volno', colorSequence: [], opponentIdSequence: []}]], "points": 0 };
+    }
+  }
+
   if (playerList.length <= 2) {
     if (playerList.length !== 2) throw new Error("Even numbered players should be handled elsewhere.");
     const origIndexOne = _players.indexOf(playerList[0]);
     const origIndexTwo = _players.indexOf(playerList[1]);
     const point = pointMatrix[origIndexTwo][origIndexOne];
-    return [{ "list": [playerList], "points": point }];
+    let basePairing = [{ "list": [playerList], "points": point }];
+    // Add the bye pairing to the end if it exists
+    if (byePairing) basePairing.push(byePairing);
+    return basePairing;
   }
+
   let comboList = [];
   for (let index = 1; index < playerList.length; index++) {
     const origIndexOne = _players.indexOf(playerList[0]);
     const origIndexTwo = _players.indexOf(playerList[index]);
     const point = pointMatrix[origIndexTwo][origIndexOne];
     if (point > ignore && index > 1) continue;
-    let copyList = [...playerList]; // Duplicate the array
+    let copyList = [...playerList];
     let firstPair = [];
-    let newComboList = [];
-    firstPair.push(copyList.shift()); // Remove the first element and add it to the firstPair
-    firstPair.push(copyList.splice(index - 1, 1)[0]); // Remove the element at the adjusted index and add it to the firstPair
+    firstPair.push(copyList.shift());
+    firstPair.push(copyList.splice(index - 1, 1)[0]);
     _findAllPairings(copyList, pointMatrix, ignore, _players).forEach(generatedComboList => {
-      let newElement = {};
-      newElement["list"] = [firstPair, ...generatedComboList["list"]];
-      newElement["points"] = point + generatedComboList["points"];
-      newComboList.push(newElement);
+      let newElement = { "list": [firstPair, ...generatedComboList["list"]], "points": point + generatedComboList["points"] };
+      // Add the bye pairing to the end of each combination if it exists
+      if (byePairing) newElement.list.push(byePairing.list[0]);
+      comboList.push(newElement);
     });
-    comboList = comboList.concat(newComboList);
   }
   return comboList;
 };
@@ -313,8 +333,16 @@ const generateNextRoundMatches = async (tournamentId, currentRound) => {
       return current.points < best.points ? current : best;
     });
 
-    console.log("Best pairing:", bestPairing.list);
     await Promise.all(bestPairing.list.map(async (pair, index) => {
+      if (pair[1].name === 'Volno') {
+        return saveMatch({
+          whitePlayer: pair[0],
+          blackPlayer: pair[1],
+          boardNumber: index + 1,
+          currentRound: currentRound
+        });
+      }
+
       // Function to find the most recent round with different colors
       const findMostRecentDifferentColorRound = (player1, player2) => {
         const minLength = Math.min(player1.colorSequence.length, player2.colorSequence.length);
@@ -416,7 +444,7 @@ ipcMain.handle('get-tournament', async (event, args) => {
 });
 
 // Change tournament phase
-ipcMain.on('change-tournament-phase', async (event, args) => {
+ipcMain.handle('change-tournament-phase', async (event, args) => {
   try {
     await runQuery('UPDATE tournaments SET phase = ? WHERE id = ?', [args.phase, args.tournamentId]);
     const { currentRound } = await getQuery('SELECT currentRound FROM tournaments WHERE id = ?', [args.tournamentId]);
@@ -426,6 +454,11 @@ ipcMain.on('change-tournament-phase', async (event, args) => {
       await revertPlayerStats(args.tournamentId, currentRound)
     }
     console.log('Tournament phase updated');
+    const matches = await allQuery('SELECT * FROM matches WHERE tournamentId = ? AND round = ?', [args.tournamentId, currentRound]);
+    const tournament = await getQuery('SELECT * FROM tournaments WHERE id = ?', [args.tournamentId]);
+    const players = await allQuery('SELECT * FROM players WHERE tournamentId = ?', [args.tournamentId]);
+
+    return { matches, tournament, players };
   } catch (err) {
     console.log(err);
   }

@@ -115,8 +115,10 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
 
   const changeTournamentPhase = async (phase: string) => {
     if (selectedTournament) {
-      await window.api.changeTournamentPhase({ tournamentId: selectedTournament.id, phase: phase, currentPhase: selectedTournament.phase })
-      await getTournament(selectedTournament.id)
+      const { matches, tournament, players } = await window.api.changeTournamentPhase({ tournamentId: selectedTournament.id, phase: phase, currentPhase: selectedTournament.phase })
+      setMatches(matches)
+      setTournamentPlayers(parsePlayers(players))
+      setSelectedTournament(tournament)
     }
   }
 
@@ -179,7 +181,11 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
   }
 
   const setResult = async (result: number) => {
-    if (selectedMatchIndex === undefined || selectedMatchIndex === -1) return
+    if (selectedMatchIndex === undefined || selectedMatchIndex === -1) {
+      const nextMatchIndex = matches.findIndex(match => match.result === null);
+      setSelectedMatchIndex(nextMatchIndex);
+      return
+    }
     selectedTournament && await window.api.saveResult({ matchId: matches[selectedMatchIndex].id, result: result })
     getMatches()
     // find next match with null result after the selectedMatchIndex
@@ -221,7 +227,6 @@ export const TournamentsProvider = ({ children }: TournamentsProviderProps) => {
         }).sort((a, b) => a.boardNumber - b.boardNumber)
       })
       setAllTournamentMatches(parsedMatches);
-      console.log(parsedMatches.map(roundMatches => roundMatches.map(match => [match.result])))
     }
   }
 

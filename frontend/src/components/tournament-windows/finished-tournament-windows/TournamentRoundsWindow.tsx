@@ -8,7 +8,7 @@ import { faAngleLeft, faAngleRight } from '@fortawesome/free-solid-svg-icons';
 
 const TournamentRoundsWindow = () => {
   const { setSelectedMatchIndex, selectedTournament, allTournamentMatches, formatNumber } = useTournaments();
-  const [selectedRound, setSelectedRound] = useState<number>(1);
+  const [selectedRound, setSelectedRound] = useState<number>(selectedTournament?.currentRound || 1);
   const [selectedRoundMatches, setSelectedRoundMatches] = useState<iMatch[]>([]);
 
   useEffect(() => {
